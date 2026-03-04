@@ -21,6 +21,7 @@
 #include <atomic>
 #include <memory>
 #include <mutex>
+#include <set>
 #include <string>
 #include <thread>
 #include <unordered_map>
@@ -93,6 +94,15 @@ private:
    */
   void rxLoop(uint8_t channel_id);
 
+  /** @brief Build full topic name based on configured prefix and relative suffix. */
+  std::string makeTopicName(const std::string & suffix) const;
+
+  /** @brief Check whether one logical publisher is enabled by configuration. */
+  bool isPublishTopicEnabled(const std::string & topic_key) const;
+
+  /** @brief Check whether one logical subscriber is enabled by configuration. */
+  bool isSubscribeTopicEnabled(const std::string & topic_key) const;
+
   std::string topic_prefix_;
   bool publish_raw_can_{true};
   bool publish_unknown_frames_{true};
@@ -100,6 +110,8 @@ private:
   int default_qos_depth_{10};
   std::unordered_map<std::string, std::string> control_channel_map_;
   std::unordered_map<std::string, std::string> feedback_channel_map_;
+  std::set<std::string> enabled_publish_topics_;
+  std::set<std::string> enabled_subscribe_topics_;
 
   std::string local_ip_;
   int can1_local_port_{8234};

@@ -10,11 +10,12 @@ namespace chassis_driver
 ControlCommandBridge::ControlCommandBridge(ChassisDriverNode & node)
 : node_(node)
 {
-  auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
+  auto qos = rclcpp::QoS(rclcpp::KeepLast(node_.default_qos_depth_));
 
-  node_.scu_control_sub_ = node_.create_subscription<chassis_interfaces::msg::ScuControlCommand>(
-    "/chassis/control/scu_control_command", qos,
-    [this](const chassis_interfaces::msg::ScuControlCommand::SharedPtr msg) {
+  if (node_.isSubscribeTopicEnabled("control_scu_control_command")) {
+    node_.scu_control_sub_ = node_.create_subscription<chassis_interfaces::msg::ScuControlCommand>(
+      node_.makeTopicName("control/scu_control_command"), qos,
+      [this](const chassis_interfaces::msg::ScuControlCommand::SharedPtr msg) {
       // Engineering assumption: although message is named SCU_*, ACU is allowed to send it.
       CanFrame frame;
       frame.can_id = 289U;
@@ -32,12 +33,14 @@ ControlCommandBridge::ControlCommandBridge(ChassisDriverNode & node)
       DbcProtocol::encodeSignal(frame, "SCU_Torque_Or_Speed_Mode", msg->scu_torque_or_speed_mode);
       DbcProtocol::encodeSignal(frame, "Steering_Angle_Speed_Valid", msg->steering_angle_speed_valid ? 1.0 : 0.0);
       DbcProtocol::encodeSignal(frame, "Brake_Force_Command_Valid", msg->brake_force_command_valid ? 1.0 : 0.0);
-      node_.sendControlFrame(frame, "SCU_Control_Command");
-    });
+        node_.sendControlFrame(frame, "SCU_Control_Command");
+      });
+  }
 
-  node_.scu_chassis_sub_ = node_.create_subscription<chassis_interfaces::msg::ScuChassisCommand>(
-    "/chassis/control/scu_chassis_command", qos,
-    [this](const chassis_interfaces::msg::ScuChassisCommand::SharedPtr msg) {
+  if (node_.isSubscribeTopicEnabled("control_scu_chassis_command")) {
+    node_.scu_chassis_sub_ = node_.create_subscription<chassis_interfaces::msg::ScuChassisCommand>(
+      node_.makeTopicName("control/scu_chassis_command"), qos,
+      [this](const chassis_interfaces::msg::ScuChassisCommand::SharedPtr msg) {
       CanFrame frame;
       frame.can_id = 294U;
       frame.dlc = 8;
@@ -46,12 +49,14 @@ ControlCommandBridge::ControlCommandBridge(ChassisDriverNode & node)
       DbcProtocol::encodeSignal(frame, "Brake_Force_Front_Right", msg->brake_force_front_right);
       DbcProtocol::encodeSignal(frame, "Brake_Force_Rear_Left", msg->brake_force_rear_left);
       DbcProtocol::encodeSignal(frame, "Brake_Force_Rear_Right", msg->brake_force_rear_right);
-      node_.sendControlFrame(frame, "SCU_Chassis_Command");
-    });
+        node_.sendControlFrame(frame, "SCU_Chassis_Command");
+      });
+  }
 
-  node_.scu_torque_sub_ = node_.create_subscription<chassis_interfaces::msg::ScuTorqueCommand>(
-    "/chassis/control/scu_torque_command", qos,
-    [this](const chassis_interfaces::msg::ScuTorqueCommand::SharedPtr msg) {
+  if (node_.isSubscribeTopicEnabled("control_scu_torque_command")) {
+    node_.scu_torque_sub_ = node_.create_subscription<chassis_interfaces::msg::ScuTorqueCommand>(
+      node_.makeTopicName("control/scu_torque_command"), qos,
+      [this](const chassis_interfaces::msg::ScuTorqueCommand::SharedPtr msg) {
       CanFrame frame;
       frame.can_id = 291U;
       frame.dlc = 8;
@@ -59,8 +64,9 @@ ControlCommandBridge::ControlCommandBridge(ChassisDriverNode & node)
       DbcProtocol::encodeSignal(frame, "Torque_Command_Front_Right", msg->torque_command_front_right);
       DbcProtocol::encodeSignal(frame, "Torque_Command_Rear_Left", msg->torque_command_rear_left);
       DbcProtocol::encodeSignal(frame, "Torque_Command_Rear_Right", msg->torque_command_rear_right);
-      node_.sendControlFrame(frame, "SCU_Torque_Command");
-    });
+        node_.sendControlFrame(frame, "SCU_Torque_Command");
+      });
+  }
 }
 
 }  // namespace chassis_driver

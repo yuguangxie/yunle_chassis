@@ -49,18 +49,44 @@ ChassisDriverNode::ChassisDriverNode()
   loadParameters();
 
   auto qos = rclcpp::QoS(rclcpp::KeepLast(default_qos_depth_));
-  raw_rx_pub_ = create_publisher<chassis_interfaces::msg::CanFrame>("/chassis/can_rx/raw", qos);
-  raw_tx_pub_ = create_publisher<chassis_interfaces::msg::CanFrame>("/chassis/can_tx/raw", qos);
-  debug_status_pub_ = create_publisher<std_msgs::msg::String>("/chassis/debug/status", qos);
-  unknown_frame_pub_ = create_publisher<std_msgs::msg::String>("/chassis/debug/unknown_frames", qos);
+  if (isPublishTopicEnabled("can_rx_raw")) {
+    raw_rx_pub_ = create_publisher<chassis_interfaces::msg::CanFrame>(makeTopicName("can_rx/raw"), qos);
+  }
+  if (isPublishTopicEnabled("can_tx_raw")) {
+    raw_tx_pub_ = create_publisher<chassis_interfaces::msg::CanFrame>(makeTopicName("can_tx/raw"), qos);
+  }
+  if (isPublishTopicEnabled("debug_status")) {
+    debug_status_pub_ = create_publisher<std_msgs::msg::String>(makeTopicName("debug/status"), qos);
+  }
+  if (isPublishTopicEnabled("debug_unknown_frames")) {
+    unknown_frame_pub_ = create_publisher<std_msgs::msg::String>(makeTopicName("debug/unknown_frames"), qos);
+  }
 
-  bms_status_pub_ = create_publisher<chassis_interfaces::msg::BmsStatus>("/chassis/feedback/bms_status", qos);
-  bms_realtime_pub_ = create_publisher<chassis_interfaces::msg::BmsRealtimeStatus>("/chassis/feedback/bms_realtime_status", qos);
-  vcu_warning_pub_ = create_publisher<chassis_interfaces::msg::VcuWarningLevel>("/chassis/feedback/vcu_warning_level", qos);
-  wheel_speed_pub_ = create_publisher<chassis_interfaces::msg::WheelSpeedFeedback>("/chassis/feedback/wheel_speed", qos);
-  ccu_status_pub_ = create_publisher<chassis_interfaces::msg::CcuStatus>("/chassis/feedback/ccu_status", qos);
-  sas_angle_pub_ = create_publisher<chassis_interfaces::msg::SasAngleFeedback>("/chassis/feedback/sas_angle", qos);
-  target_speed_pub_ = create_publisher<chassis_interfaces::msg::ScuTargetSpeedFeedback>("/chassis/feedback/target_speed_feedback", qos);
+  if (isPublishTopicEnabled("feedback_bms_status")) {
+    bms_status_pub_ = create_publisher<chassis_interfaces::msg::BmsStatus>(makeTopicName("feedback/bms_status"), qos);
+  }
+  if (isPublishTopicEnabled("feedback_bms_realtime_status")) {
+    bms_realtime_pub_ = create_publisher<chassis_interfaces::msg::BmsRealtimeStatus>(
+      makeTopicName("feedback/bms_realtime_status"), qos);
+  }
+  if (isPublishTopicEnabled("feedback_vcu_warning_level")) {
+    vcu_warning_pub_ = create_publisher<chassis_interfaces::msg::VcuWarningLevel>(
+      makeTopicName("feedback/vcu_warning_level"), qos);
+  }
+  if (isPublishTopicEnabled("feedback_wheel_speed")) {
+    wheel_speed_pub_ = create_publisher<chassis_interfaces::msg::WheelSpeedFeedback>(
+      makeTopicName("feedback/wheel_speed"), qos);
+  }
+  if (isPublishTopicEnabled("feedback_ccu_status")) {
+    ccu_status_pub_ = create_publisher<chassis_interfaces::msg::CcuStatus>(makeTopicName("feedback/ccu_status"), qos);
+  }
+  if (isPublishTopicEnabled("feedback_sas_angle")) {
+    sas_angle_pub_ = create_publisher<chassis_interfaces::msg::SasAngleFeedback>(makeTopicName("feedback/sas_angle"), qos);
+  }
+  if (isPublishTopicEnabled("feedback_target_speed_feedback")) {
+    target_speed_pub_ = create_publisher<chassis_interfaces::msg::ScuTargetSpeedFeedback>(
+      makeTopicName("feedback/target_speed_feedback"), qos);
+  }
 
   initializeChannels();
 
@@ -79,11 +105,13 @@ ChassisDriverNode::~ChassisDriverNode()
 /** Declare/read ROS parameters and build message-channel lookup tables. */
 void ChassisDriverNode::loadParameters()
 {
-  declare_parameter<std::string>("topic_prefix", "/chassis");
+  declare_parameter<std::string>("topic_prefix", "/yunle_chassis");
   declare_parameter<bool>("publish_raw_can", true);
   declare_parameter<bool>("publish_unknown_frames", true);
   declare_parameter<bool>("enable_debug_topics", true);
   declare_parameter<int>("default_qos_depth", 10);
+  declare_parameter<std::vector<std::string>>("enabled_publish_topics", std::vector<std::string>{"all"});
+  declare_parameter<std::vector<std::string>>("enabled_subscribe_topics", std::vector<std::string>{"all"});
   declare_parameter<std::vector<std::string>>("message_channel_map", {});
   declare_parameter<std::vector<std::string>>("control_message_channel_map", {});
   declare_parameter<std::string>("local_ip", "192.168.1.102");
@@ -96,10 +124,27 @@ void ChassisDriverNode::loadParameters()
   declare_parameter<int>("socket_timeout_ms", 200);
 
   get_parameter("topic_prefix", topic_prefix_);
+  if (topic_prefix_.empty()) {
+    topic_prefix_ = "/yunle_chassis";
+  }
+  if (topic_prefix_.front() != '/') {
+    topic_prefix_ = "/" + topic_prefix_;
+  }
+  while (topic_prefix_.size() > 1 && topic_prefix_.back() == '/') {
+    topic_prefix_.pop_back();
+  }
+
   get_parameter("publish_raw_can", publish_raw_can_);
   get_parameter("publish_unknown_frames", publish_unknown_frames_);
   get_parameter("enable_debug_topics", enable_debug_topics_);
   get_parameter("default_qos_depth", default_qos_depth_);
+
+  std::vector<std::string> enabled_publish_topics;
+  std::vector<std::string> enabled_subscribe_topics;
+  get_parameter("enabled_publish_topics", enabled_publish_topics);
+  get_parameter("enabled_subscribe_topics", enabled_subscribe_topics);
+  enabled_publish_topics_ = std::set<std::string>(enabled_publish_topics.begin(), enabled_publish_topics.end());
+  enabled_subscribe_topics_ = std::set<std::string>(enabled_subscribe_topics.begin(), enabled_subscribe_topics.end());
 
   std::vector<std::string> map_entries;
   std::vector<std::string> control_map_entries;
@@ -210,7 +255,7 @@ void ChassisDriverNode::publishDecoded(const CanFrame & frame)
       msg.bms_voltage = static_cast<float>(get("BMS_Voltage"));
       msg.bms_current = static_cast<float>(get("BMS_Current"));
       msg.bms_soc = static_cast<float>(get("BMS_SOC"));
-      bms_status_pub_->publish(msg);
+      if (bms_status_pub_) { bms_status_pub_->publish(msg); }
       break;
     }
     case 2542813185U: {
@@ -220,7 +265,7 @@ void ChassisDriverNode::publishDecoded(const CanFrame & frame)
       msg.bms_pack_voltage = static_cast<float>(get("BMS_Pack_Voltage"));
       msg.bms_pack_current = static_cast<float>(get("BMS_Pack_Current"));
       msg.bms_realtime_soc = static_cast<float>(get("BMS_Realtime_SOC"));
-      bms_realtime_pub_->publish(msg);
+      if (bms_realtime_pub_) { bms_realtime_pub_->publish(msg); }
       break;
     }
     case 119U: {
@@ -239,7 +284,7 @@ void ChassisDriverNode::publishDecoded(const CanFrame & frame)
       msg.steering_disconnect_warning = static_cast<uint8_t>(get("Steering_Disconnect_Warning"));
       msg.steering_lock_warning = static_cast<uint8_t>(get("Steering_Lock_Warning"));
       msg.steering_uncontrollable_warning = static_cast<uint8_t>(get("Steering_Uncontrollable_Warning"));
-      vcu_warning_pub_->publish(msg);
+      if (vcu_warning_pub_) { vcu_warning_pub_->publish(msg); }
       break;
     }
     case 360U: {
@@ -249,7 +294,7 @@ void ChassisDriverNode::publishDecoded(const CanFrame & frame)
       msg.wheel_speed_front_right_rpm = static_cast<float>(get("Wheel_Speed_Front_Right_RPM"));
       msg.wheel_speed_rear_left_rpm = static_cast<float>(get("Wheel_Speed_Rear_Left_RPM"));
       msg.wheel_speed_rear_right_rpm = static_cast<float>(get("Wheel_Speed_Rear_Right_RPM"));
-      wheel_speed_pub_->publish(msg);
+      if (wheel_speed_pub_) { wheel_speed_pub_->publish(msg); }
       break;
     }
     case 81U: {
@@ -270,7 +315,7 @@ void ChassisDriverNode::publishDecoded(const CanFrame & frame)
       msg.right_turn_light_status = get("Right_Turn_Light_Status") > 0.5;
       msg.position_light_status = get("Position_Light_Status") > 0.5;
       msg.low_beam_status = get("Low_Beam_Status") > 0.5;
-      ccu_status_pub_->publish(msg);
+      if (ccu_status_pub_) { ccu_status_pub_->publish(msg); }
       break;
     }
     case 225U: {
@@ -278,7 +323,7 @@ void ChassisDriverNode::publishDecoded(const CanFrame & frame)
       msg.stamp = stamp;
       msg.sas_front_angle = static_cast<float>(get("SAS_Front_Angle"));
       msg.sas_rear_angle = static_cast<float>(get("SAS_Rear_Angle"));
-      sas_angle_pub_->publish(msg);
+      if (sas_angle_pub_) { sas_angle_pub_->publish(msg); }
       break;
     }
     case 2033U: {
@@ -288,7 +333,7 @@ void ChassisDriverNode::publishDecoded(const CanFrame & frame)
       msg.scu_target_speed_feedback = static_cast<float>(get("SCU_Target_Speed_Feedback"));
       msg.vehicle_target_speed = static_cast<float>(get("Vehicle_Target_Speed"));
       msg.vehicle_target_speed_rpm = static_cast<float>(get("Vehicle_Target_Speed_RPM"));
-      target_speed_pub_->publish(msg);
+      if (target_speed_pub_) { target_speed_pub_->publish(msg); }
       break;
     }
     default:
@@ -301,14 +346,14 @@ void ChassisDriverNode::publishDecoded(const CanFrame & frame)
 void ChassisDriverNode::publishRawRx(const CanFrame & frame)
 {
   if (!publish_raw_can_) return;
-  raw_rx_pub_->publish(toRosFrame(frame, now()));
+  if (raw_rx_pub_) { raw_rx_pub_->publish(toRosFrame(frame, now())); }
 }
 
 /** Publish raw TX frame when enabled. */
 void ChassisDriverNode::publishRawTx(const CanFrame & frame)
 {
   if (!publish_raw_can_) return;
-  raw_tx_pub_->publish(toRosFrame(frame, now()));
+  if (raw_tx_pub_) { raw_tx_pub_->publish(toRosFrame(frame, now())); }
 }
 
 /** Publish unknown-frame debug message when enabled. */
@@ -319,7 +364,32 @@ void ChassisDriverNode::publishUnknownFrame(const CanFrame & frame)
   std::stringstream ss;
   ss << "Unknown frame: id=" << frame.can_id << " ext=" << frame.is_extended << " ch=" << static_cast<int>(frame.channel);
   msg.data = ss.str();
-  unknown_frame_pub_->publish(msg);
+  if (unknown_frame_pub_) { unknown_frame_pub_->publish(msg); }
+}
+
+
+/** Build topic name by joining configured prefix and suffix. */
+std::string ChassisDriverNode::makeTopicName(const std::string & suffix) const
+{
+  if (suffix.empty()) {
+    return topic_prefix_;
+  }
+  if (suffix.front() == '/') {
+    return topic_prefix_ + suffix;
+  }
+  return topic_prefix_ + "/" + suffix;
+}
+
+/** Check whether publisher topic key is enabled by parameter list. */
+bool ChassisDriverNode::isPublishTopicEnabled(const std::string & topic_key) const
+{
+  return enabled_publish_topics_.count("all") > 0 || enabled_publish_topics_.count(topic_key) > 0;
+}
+
+/** Check whether subscriber topic key is enabled by parameter list. */
+bool ChassisDriverNode::isSubscribeTopicEnabled(const std::string & topic_key) const
+{
+  return enabled_subscribe_topics_.count("all") > 0 || enabled_subscribe_topics_.count(topic_key) > 0;
 }
 
 /** Resolve channel ID from configured map with fallback to channel 1. */
