@@ -1,0 +1,327 @@
+VERSION "Yunle_CAN_NTD Release v1.0.0"
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: ACU ADAS BMS Compressor Diagnostics ECAS EPS HVAC IBC Motor_Control SAS_SW SCU TBOX TPMS UDAN VCU
+VAL_TABLE_ VT_OnOff 0 "Off" 1 "On" ;
+VAL_TABLE_ VT_Enable 0 "Disable" 1 "Enable" ;
+VAL_TABLE_ VT_Validity 0 "Invalid" 1 "Valid" ;
+VAL_TABLE_ VT_Active 0 "Inactive" 1 "Active" ;
+VAL_TABLE_ VT_Request2 0 "NoRequest" 1 "Request" 2 "Reserved2" 3 "Reserved3" ;
+VAL_TABLE_ VT_ShiftLevel 0 "Invalid" 1 "D" 2 "N" 3 "R" ;
+VAL_TABLE_ VT_DriveMode 0 "Manual" 1 "Remote" 2 "Auto" 3 "Reserved" ;
+VAL_TABLE_ VT_IgnitionState 0 "Off" 1 "Acc" 2 "On" 3 "Start" ;
+VAL_TABLE_ VT_Direction 0 "LeftOrNegative" 1 "RightOrPositive" ;
+VAL_TABLE_ VT_WarningLevel 0 "Normal" 1 "Warning" 2 "Derating" 3 "Fault" 4 "Severe" 5 "Reserved5" 6 "Reserved6" 7 "Reserved7" ;
+VAL_TABLE_ VT_TorqueOrSpeedMode 0 "TorqueMode" 1 "SpeedMode" ;
+
+
+BO_ 256 BMS_Status: 8 BMS
+ SG_ BMS_Voltage : 0|16@1+ (0.1,0) [0|6553.5] "V"  VCU,TBOX
+ SG_ BMS_Current : 16|16@1- (0.1,0) [-3276.8|3276.7] "A"  VCU,TBOX
+ SG_ BMS_SOC : 32|16@1+ (0.1,0) [0|100] "%"  VCU,TBOX
+
+BO_ 119 VCU_Warning_Level: 8 VCU
+ SG_ BMS_Charge_Current_Warning : 0|3@1+ (1,0) [0|7] ""  SCU,TBOX
+ SG_ BMS_Discharge_Current_Warning : 3|3@1+ (1,0) [0|7] ""  SCU,TBOX
+ SG_ BMS_SOC_Warning : 6|3@1+ (1,0) [0|7] ""  SCU,TBOX
+ SG_ BMS_Temperature_Warning : 9|3@1+ (1,0) [0|7] ""  SCU,TBOX
+ SG_ MCU_Current_Warning : 12|3@1+ (1,0) [0|7] ""  SCU,TBOX
+ SG_ MCU_Disconnect_Warning : 15|3@1+ (1,0) [0|7] ""  SCU,TBOX
+ SG_ MCU_Motor_Warning : 18|3@1+ (1,0) [0|7] ""  SCU,TBOX
+ SG_ MCU_Speed_Warning : 21|3@1+ (1,0) [0|7] ""  SCU,TBOX
+ SG_ MCU_Temperature_Warning : 24|3@1+ (1,0) [0|7] ""  SCU,TBOX
+ SG_ MCU_Voltage_Warning : 27|3@1+ (1,0) [0|7] ""  SCU,TBOX
+ SG_ Steering_Disconnect_Warning : 30|3@1+ (1,0) [0|7] ""  SCU,TBOX
+ SG_ Steering_Lock_Warning : 33|3@1+ (1,0) [0|7] ""  SCU,TBOX
+ SG_ Steering_Uncontrollable_Warning : 36|3@1+ (1,0) [0|7] ""  SCU,TBOX
+
+BO_ 1808 VCU_Debug_Enable: 8 VCU
+ SG_ PID_Debug_Enable : 2|1@1+ (1,0) [0|1] ""  Diagnostics
+
+BO_ 1813 VCU_Drive_Debug: 8 VCU
+ SG_ Velocity_Kp : 34|10@1+ (0.1,0) [0|102.3] ""  Diagnostics
+ SG_ Velocity_Ki : 44|10@1+ (0.01,0) [0|10.23] ""  Diagnostics
+ SG_ Velocity_Kd : 54|10@1+ (0.01,0) [0|10.23] ""  Diagnostics
+
+BO_ 2033 SCU_Target_Speed_Feedback: 8 SCU
+ SG_ Hardware_Target_Speed : 0|16@1- (0.1,0) [-3276.8|3276.7] "km/h"  VCU,TBOX
+ SG_ SCU_Target_Speed_Feedback : 16|16@1- (0.1,0) [-3276.8|3276.7] "km/h"  VCU,TBOX
+ SG_ Vehicle_Target_Speed : 32|16@1- (0.1,0) [-3276.8|3276.7] "km/h"  VCU,TBOX
+ SG_ Vehicle_Target_Speed_RPM : 48|16@1- (0.1,0) [-3276.8|3276.7] "rpm"  VCU,TBOX
+
+BO_ 225 SAS_Angle_Feedback: 8 SAS_SW
+ SG_ SAS_Front_Angle : 0|16@1- (0.1,0) [-3276.8|3276.7] "deg"  VCU,TBOX
+ SG_ SAS_Rear_Angle : 24|16@1- (0.1,0) [-3276.8|3276.7] "deg"  VCU,TBOX
+
+BO_ 360 VCU_Wheel_Speed_Feedback: 8 VCU
+ SG_ Wheel_Speed_Front_Left_RPM : 0|16@1- (0.1,0) [-3276.8|3276.7] "rpm"  SCU,TBOX
+ SG_ Wheel_Speed_Front_Right_RPM : 16|16@1- (0.1,0) [-3276.8|3276.7] "rpm"  SCU,TBOX
+ SG_ Wheel_Speed_Rear_Left_RPM : 32|16@1- (0.1,0) [-3276.8|3276.7] "rpm"  SCU,TBOX
+ SG_ Wheel_Speed_Rear_Right_RPM : 48|16@1- (0.1,0) [-3276.8|3276.7] "rpm"  SCU,TBOX
+
+BO_ 81 VCU_CCU_Status: 8 VCU
+ SG_ CCU_Shift_Level_Status : 0|2@1+ (1,0) [0|3] ""  SCU,TBOX
+ SG_ CCU_Parking_Status : 2|1@1+ (1,0) [0|1] ""  SCU,TBOX
+ SG_ CCU_Ignition_Status : 3|2@1+ (1,0) [0|3] ""  SCU,TBOX
+ SG_ CCU_Drive_Mode_Shift_Button : 5|1@1+ (1,0) [0|1] ""  SCU,TBOX
+ SG_ Steering_Wheel_Direction : 7|1@1+ (1,0) [0|1] ""  SCU,TBOX
+ SG_ CCU_Steering_Wheel_Angle : 8|12@1+ (0.1,0) [0|120] ""  SCU,TBOX
+ SG_ CCU_Vehicle_Speed : 20|9@1+ (0.1,0) [0|51.1] "km/h"  SCU,TBOX
+ SG_ CCU_Drive_Mode : 29|3@1+ (1,0) [0|3] ""  SCU,TBOX
+ SG_ Remote_Brake_Request_Status : 32|1@1+ (1,0) [0|1] ""  SCU,TBOX
+ SG_ Emergency_Brake_Request_Status : 33|1@1+ (1,0) [0|1] ""  SCU,TBOX
+ SG_ SCU_Brake_Signal_Status : 34|1@1+ (1,0) [0|1] ""  SCU,TBOX
+ SG_ Left_Turn_Light_Status : 56|1@1+ (1,0) [0|1] ""  SCU,TBOX
+ SG_ Right_Turn_Light_Status : 57|1@1+ (1,0) [0|1] ""  SCU,TBOX
+ SG_ Position_Light_Status : 59|1@1+ (1,0) [0|1] ""  SCU,TBOX
+ SG_ Low_Beam_Status : 60|1@1+ (1,0) [0|1] ""  SCU,TBOX
+
+BO_ 291 SCU_Torque_Command: 8 SCU
+ SG_ Torque_Command_Front_Left : 0|16@1- (0.1,0) [-3276.8|3276.7] "Nm"  Motor_Control
+ SG_ Torque_Command_Front_Right : 16|16@1- (0.1,0) [-3276.8|3276.7] "Nm"  Motor_Control
+ SG_ Torque_Command_Rear_Left : 32|16@1- (0.1,0) [-3276.8|3276.7] "Nm"  Motor_Control
+ SG_ Torque_Command_Rear_Right : 48|16@1- (0.1,0) [-3276.8|3276.7] "Nm"  Motor_Control
+
+BO_ 294 SCU_Chassis_Command: 8 SCU
+ SG_ VCU_Target_Steering_Angle_Speed : 0|16@1- (1,0) [126|525] "deg/s"  EPS,SAS_SW
+ SG_ Brake_Force_Front_Left : 16|8@1+ (1,0) [0|100] "%"  ECAS
+ SG_ Brake_Force_Front_Right : 24|8@1+ (1,0) [0|100] "%"  ECAS
+ SG_ Brake_Force_Rear_Left : 32|8@1+ (1,0) [0|100] "%"  ECAS
+ SG_ Brake_Force_Rear_Right : 40|8@1+ (1,0) [0|100] "%"  ECAS
+
+BO_ 289 SCU_Control_Command: 8 SCU
+ SG_ SCU_Shift_Level_Request : 0|2@1+ (1,0) [0|3] ""  VCU
+ SG_ SCU_Drive_Mode_Request : 6|2@1+ (1,0) [0|3] ""  VCU
+ SG_ SCU_Steering_Angle_JD01_Front : 8|8@1+ (1,0) [0|255] ""  VCU
+ SG_ SCU_Steering_Angle_JD01_Rear : 16|8@1+ (1,0) [0|255] ""  VCU
+ SG_ SCU_Target_Speed : 24|9@1+ (0.1,0) [0|51.1] "km/h"  VCU
+ SG_ SCU_Brake_Enable : 33|1@1+ (1,0) [0|1] ""  VCU
+ SG_ GW_Left_Turn_Light_Request : 40|2@1+ (1,0) [0|3] ""  TBOX
+ SG_ GW_Right_Turn_Light_Request : 42|2@1+ (1,0) [0|3] ""  TBOX
+ SG_ GW_Position_Light_Request : 46|2@1+ (1,0) [0|3] ""  TBOX
+ SG_ GW_Low_Beam_Request : 48|2@1+ (1,0) [0|3] ""  TBOX
+ SG_ SCU_Torque_Or_Speed_Mode : 58|1@1+ (1,0) [0|1] ""  VCU
+ SG_ Steering_Angle_Speed_Valid : 60|1@1+ (1,0) [0|1] ""  VCU
+ SG_ Brake_Force_Command_Valid : 61|1@1+ (1,0) [0|1] ""  VCU
+
+BO_ 2542813185 BMS_Realtime_Status: 8 BMS
+ SG_ BMS_Total_Battery_Voltage : 0|16@1+ (0.1,0) [0|6553.5] "V"  VCU,TBOX
+ SG_ BMS_Pack_Voltage : 16|16@1+ (0.1,0) [0|6553.5] "V"  VCU,TBOX
+ SG_ BMS_Pack_Current : 32|16@1+ (0.1,-3000) [-3000|3553.5] "A"  VCU,TBOX
+ SG_ BMS_Realtime_SOC : 48|16@1+ (0.1,0) [0|100] "%"  VCU,TBOX
+
+BO_TX_BU_ 291 : ACU,SCU;
+BO_TX_BU_ 294 : ACU,SCU;
+BO_TX_BU_ 289 : ACU,SCU;
+
+
+CM_ BU_ BMS "Battery Management System.";
+CM_ BU_ Diagnostics "Diagnostic and calibration interface.";
+CM_ BU_ ECAS "Brake or chassis actuator controller receiving force requests.";
+CM_ BU_ EPS "Electric power steering controller.";
+CM_ BU_ Motor_Control "Traction inverter or motor controller.";
+CM_ BU_ SAS_SW "Steering angle sensor node.";
+CM_ BU_ SCU "Supervisory Control Unit.";
+CM_ BU_ TBOX "Telematics box.";
+CM_ BU_ VCU "Vehicle Control Unit.";
+CM_ BO_ 256 "Battery status message published by the BMS.";
+CM_ SG_ 256 BMS_Voltage "Battery pack voltage. Resolution: 0.1 V.";
+CM_ SG_ 256 BMS_Current "Battery pack current. Resolution: 0.1 A. Sign convention shall be confirmed by the system specification.";
+CM_ SG_ 256 BMS_SOC "Battery state of charge. Recommended operational range: 0 to 100 %.";
+CM_ BO_ 119 "Aggregated warning severity levels generated by the VCU.";
+CM_ SG_ 119 BMS_Charge_Current_Warning "Warning severity for BMS charge current.";
+CM_ SG_ 119 BMS_Discharge_Current_Warning "Warning severity for BMS discharge current.";
+CM_ SG_ 119 BMS_SOC_Warning "Warning severity for BMS state of charge.";
+CM_ SG_ 119 BMS_Temperature_Warning "Warning severity for BMS temperature.";
+CM_ SG_ 119 MCU_Current_Warning "Warning severity for MCU current.";
+CM_ SG_ 119 MCU_Disconnect_Warning "Warning severity for MCU communication or disconnect status.";
+CM_ SG_ 119 MCU_Motor_Warning "Warning severity for motor-related faults.";
+CM_ SG_ 119 MCU_Speed_Warning "Warning severity for motor speed.";
+CM_ SG_ 119 MCU_Temperature_Warning "Warning severity for MCU temperature.";
+CM_ SG_ 119 MCU_Voltage_Warning "Warning severity for MCU voltage.";
+CM_ SG_ 119 Steering_Disconnect_Warning "Warning severity for steering disconnect condition.";
+CM_ SG_ 119 Steering_Lock_Warning "Warning severity for steering lock condition.";
+CM_ SG_ 119 Steering_Uncontrollable_Warning "Warning severity for steering uncontrollable condition.";
+CM_ BO_ 1808 "Debug enable command used for diagnostic calibration workflows.";
+CM_ SG_ 1808 PID_Debug_Enable "Enable flag for PID debug mode.";
+CM_ BO_ 1813 "Debug parameters for longitudinal speed-loop tuning.";
+CM_ SG_ 1813 Velocity_Kp "Proportional gain for velocity control loop.";
+CM_ SG_ 1813 Velocity_Ki "Integral gain for velocity control loop.";
+CM_ SG_ 1813 Velocity_Kd "Derivative gain for velocity control loop.";
+CM_ BO_ 2033 "Target speed feedback information produced by the SCU.";
+CM_ SG_ 2033 Hardware_Target_Speed "Target speed requested by hardware layer.";
+CM_ SG_ 2033 SCU_Target_Speed_Feedback "Target speed feedback generated by the SCU.";
+CM_ SG_ 2033 Vehicle_Target_Speed "Vehicle target speed used by the control stack.";
+CM_ SG_ 2033 Vehicle_Target_Speed_RPM "Equivalent target rotational speed.";
+CM_ BO_ 225 "Steering angle feedback from the steering angle sensor.";
+CM_ SG_ 225 SAS_Front_Angle "Front steering angle reported by SAS.";
+CM_ SG_ 225 SAS_Rear_Angle "Rear steering angle reported by SAS.";
+CM_ BO_ 360 "Wheel speed feedback published by the VCU.";
+CM_ SG_ 360 Wheel_Speed_Front_Left_RPM "Front-left wheel speed.";
+CM_ SG_ 360 Wheel_Speed_Front_Right_RPM "Front-right wheel speed.";
+CM_ SG_ 360 Wheel_Speed_Rear_Left_RPM "Rear-left wheel speed.";
+CM_ SG_ 360 Wheel_Speed_Rear_Right_RPM "Rear-right wheel speed.";
+CM_ BO_ 81 "CCU-related chassis and lighting status consolidated by the VCU.";
+CM_ SG_ 81 CCU_Shift_Level_Status "Current shift level status reported by the CCU.";
+CM_ SG_ 81 CCU_Parking_Status "Parking status reported by the CCU.";
+CM_ SG_ 81 CCU_Ignition_Status "Ignition status reported by the CCU.";
+CM_ SG_ 81 CCU_Drive_Mode_Shift_Button "Drive-mode shift button status.";
+CM_ SG_ 81 Steering_Wheel_Direction "Steering direction sign flag.";
+CM_ SG_ 81 CCU_Steering_Wheel_Angle "Steering wheel angle reported by the CCU.";
+CM_ SG_ 81 CCU_Vehicle_Speed "Vehicle speed reported by the CCU.";
+CM_ SG_ 81 CCU_Drive_Mode "Drive mode reported by the CCU.";
+CM_ SG_ 81 Remote_Brake_Request_Status "Remote brake request status.";
+CM_ SG_ 81 Emergency_Brake_Request_Status "Emergency brake request status.";
+CM_ SG_ 81 SCU_Brake_Signal_Status "Brake signal status used by the SCU.";
+CM_ SG_ 81 Left_Turn_Light_Status "Left turn lamp status.";
+CM_ SG_ 81 Right_Turn_Light_Status "Right turn lamp status.";
+CM_ SG_ 81 Position_Light_Status "Position lamp status.";
+CM_ SG_ 81 Low_Beam_Status "Low-beam lamp status.";
+CM_ BO_ 291 "Torque command issued by the SCU to the motor controller.";
+CM_ SG_ 291 Torque_Command_Front_Left "Torque command for front-left wheel.";
+CM_ SG_ 291 Torque_Command_Front_Right "Torque command for front-right wheel.";
+CM_ SG_ 291 Torque_Command_Rear_Left "Torque command for rear-left wheel.";
+CM_ SG_ 291 Torque_Command_Rear_Right "Torque command for rear-right wheel.";
+CM_ BO_ 294 "Chassis command message containing steering-rate and brake-force requests.";
+CM_ SG_ 294 VCU_Target_Steering_Angle_Speed "Requested steering angle rate.";
+CM_ SG_ 294 Brake_Force_Front_Left "Requested brake force for front-left channel.";
+CM_ SG_ 294 Brake_Force_Front_Right "Requested brake force for front-right channel.";
+CM_ SG_ 294 Brake_Force_Rear_Left "Requested brake force for rear-left channel.";
+CM_ SG_ 294 Brake_Force_Rear_Right "Requested brake force for rear-right channel.";
+CM_ BO_ 289 "Primary SCU control command message.";
+CM_ SG_ 289 SCU_Shift_Level_Request "Requested shift level sent to the SCU.";
+CM_ SG_ 289 SCU_Drive_Mode_Request "Requested drive mode sent to the SCU.";
+CM_ SG_ 289 SCU_Steering_Angle_JD01_Front "Front steering angle command encoded in JD01 format.";
+CM_ SG_ 289 SCU_Steering_Angle_JD01_Rear "Rear steering angle command encoded in JD01 format.";
+CM_ SG_ 289 SCU_Target_Speed "Vehicle target speed sent to the SCU.";
+CM_ SG_ 289 SCU_Brake_Enable "Brake enable request sent to the SCU.";
+CM_ SG_ 289 GW_Left_Turn_Light_Request "Gateway request for left turn lamp.";
+CM_ SG_ 289 GW_Right_Turn_Light_Request "Gateway request for right turn lamp.";
+CM_ SG_ 289 GW_Position_Light_Request "Gateway request for position lamp.";
+CM_ SG_ 289 GW_Low_Beam_Request "Gateway request for low-beam lamp.";
+CM_ SG_ 289 SCU_Torque_Or_Speed_Mode "Control mode selection for SCU torque or speed control.";
+CM_ SG_ 289 Steering_Angle_Speed_Valid "Validity flag for steering-rate command.";
+CM_ SG_ 289 Brake_Force_Command_Valid "Validity flag for brake-force command.";
+CM_ BO_ 2542813185 "Extended real-time battery status message using extended CAN identifier.";
+CM_ SG_ 2542813185 BMS_Total_Battery_Voltage "Total battery voltage reported by the BMS.";
+CM_ SG_ 2542813185 BMS_Pack_Voltage "Pack voltage reported by the BMS.";
+CM_ SG_ 2542813185 BMS_Pack_Current "Pack current reported by the BMS. Offset: -3000 A.";
+CM_ SG_ 2542813185 BMS_Realtime_SOC "Real-time battery state of charge.";
+BA_DEF_  "BusType" STRING ;
+BA_DEF_ BO_  "VFrameFormat" ENUM  "StandardCAN","ExtendedCAN","reserved","J1939PG";
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 65535;
+BA_DEF_ BO_  "GenMsgSendType" ENUM  "Cyclic","IfActive","NoMsgSendType","CyclicAndSpontan","Spontan","CyclicIfActive","Triggered","CyclicTriggered","CyclicWithRepeatOnChange","IfActiveWithRepeatOnChange","IfActiveFast","CyclicIfActiveFast","NotUsed";
+BA_DEF_ SG_  "GenSigStartValue" FLOAT 0 100000000000;
+BA_DEF_ SG_  "GenSigInactiveValue" FLOAT 0 100000000000;
+BA_DEF_DEF_  "BusType" "CAN";
+BA_DEF_DEF_  "VFrameFormat" "StandardCAN";
+BA_DEF_DEF_  "GenMsgCycleTime" 100;
+BA_DEF_DEF_  "GenMsgSendType" "Cyclic";
+BA_DEF_DEF_  "GenSigStartValue" 0;
+BA_DEF_DEF_  "GenSigInactiveValue" 0;
+BA_ "BusType" "CAN";
+BA_ "GenMsgSendType" BO_ 256 0;
+BA_ "GenMsgCycleTime" BO_ 256 100;
+BA_ "VFrameFormat" BO_ 256 0;
+BA_ "GenMsgSendType" BO_ 119 0;
+BA_ "GenMsgCycleTime" BO_ 119 100;
+BA_ "VFrameFormat" BO_ 119 0;
+BA_ "GenMsgSendType" BO_ 1808 0;
+BA_ "GenMsgCycleTime" BO_ 1808 100;
+BA_ "VFrameFormat" BO_ 1808 0;
+BA_ "GenMsgSendType" BO_ 1813 0;
+BA_ "GenMsgCycleTime" BO_ 1813 100;
+BA_ "VFrameFormat" BO_ 1813 0;
+BA_ "GenMsgSendType" BO_ 2033 0;
+BA_ "GenMsgCycleTime" BO_ 2033 20;
+BA_ "VFrameFormat" BO_ 2033 0;
+BA_ "GenMsgSendType" BO_ 225 0;
+BA_ "GenMsgCycleTime" BO_ 225 20;
+BA_ "VFrameFormat" BO_ 225 0;
+BA_ "GenMsgSendType" BO_ 360 0;
+BA_ "GenMsgCycleTime" BO_ 360 20;
+BA_ "VFrameFormat" BO_ 360 0;
+BA_ "GenMsgSendType" BO_ 81 0;
+BA_ "GenMsgCycleTime" BO_ 81 20;
+BA_ "VFrameFormat" BO_ 81 0;
+BA_ "GenMsgSendType" BO_ 291 0;
+BA_ "GenMsgCycleTime" BO_ 291 20;
+BA_ "VFrameFormat" BO_ 291 0;
+BA_ "GenMsgSendType" BO_ 294 0;
+BA_ "GenMsgCycleTime" BO_ 294 20;
+BA_ "VFrameFormat" BO_ 294 0;
+BA_ "GenMsgSendType" BO_ 289 0;
+BA_ "GenMsgCycleTime" BO_ 289 20;
+BA_ "VFrameFormat" BO_ 289 0;
+BA_ "GenMsgSendType" BO_ 2542813185 0;
+BA_ "GenMsgCycleTime" BO_ 2542813185 100;
+BA_ "VFrameFormat" BO_ 2542813185 1;
+VAL_ 119 BMS_Charge_Current_Warning 0 "Normal" 1 "Warning" 2 "Derating" 3 "Fault" 4 "Severe" ;
+VAL_ 119 BMS_Discharge_Current_Warning 0 "Normal" 1 "Warning" 2 "Derating" 3 "Fault" 4 "Severe" ;
+VAL_ 119 BMS_SOC_Warning 0 "Normal" 1 "Warning" 2 "Derating" 3 "Fault" 4 "Severe" ;
+VAL_ 119 BMS_Temperature_Warning 0 "Normal" 1 "Warning" 2 "Derating" 3 "Fault" 4 "Severe" ;
+VAL_ 119 MCU_Current_Warning 0 "Normal" 1 "Warning" 2 "Derating" 3 "Fault" 4 "Severe" ;
+VAL_ 119 MCU_Disconnect_Warning 0 "Normal" 1 "Warning" 2 "Derating" 3 "Fault" 4 "Severe" ;
+VAL_ 119 MCU_Motor_Warning 0 "Normal" 1 "Warning" 2 "Derating" 3 "Fault" 4 "Severe" ;
+VAL_ 119 MCU_Speed_Warning 0 "Normal" 1 "Warning" 2 "Derating" 3 "Fault" 4 "Severe" ;
+VAL_ 119 MCU_Temperature_Warning 0 "Normal" 1 "Warning" 2 "Derating" 3 "Fault" 4 "Severe" ;
+VAL_ 119 MCU_Voltage_Warning 0 "Normal" 1 "Warning" 2 "Derating" 3 "Fault" 4 "Severe" ;
+VAL_ 119 Steering_Disconnect_Warning 0 "Normal" 1 "Warning" 2 "Derating" 3 "Fault" 4 "Severe" ;
+VAL_ 119 Steering_Lock_Warning 0 "Normal" 1 "Warning" 2 "Derating" 3 "Fault" 4 "Severe" ;
+VAL_ 119 Steering_Uncontrollable_Warning 0 "Normal" 1 "Warning" 2 "Derating" 3 "Fault" 4 "Severe" ;
+VAL_ 1808 PID_Debug_Enable 0 "Disable" 1 "Enable" ;
+VAL_ 81 CCU_Shift_Level_Status 0 "Invalid" 1 "D" 2 "N" 3 "R" ;
+VAL_ 81 CCU_Parking_Status 0 "Released" 1 "Applied" ;
+VAL_ 81 CCU_Ignition_Status 0 "Off" 1 "Acc" 2 "On" 3 "Start" ;
+VAL_ 81 CCU_Drive_Mode_Shift_Button 0 "Manual" 1 "ShiftButtonPressed" ;
+VAL_ 81 Steering_Wheel_Direction 0 "LeftOrNegative" 1 "RightOrPositive" ;
+VAL_ 81 Remote_Brake_Request_Status 0 "Inactive" 1 "Active" ;
+VAL_ 81 Emergency_Brake_Request_Status 0 "Inactive" 1 "Active" ;
+VAL_ 81 SCU_Brake_Signal_Status 0 "Inactive" 1 "Active" ;
+VAL_ 81 Left_Turn_Light_Status 0 "Off" 1 "On" ;
+VAL_ 81 Right_Turn_Light_Status 0 "Off" 1 "On" ;
+VAL_ 81 Position_Light_Status 0 "Off" 1 "On" ;
+VAL_ 81 Low_Beam_Status 0 "Off" 1 "On" ;
+VAL_ 289 SCU_Shift_Level_Request 0 "Invalid" 1 "D" 2 "N" 3 "R" ;
+VAL_ 289 SCU_Drive_Mode_Request 0 "Manual" 1 "Remote" 2 "Auto" 3 "Reserved" ;
+VAL_ 289 SCU_Brake_Enable 0 "Disable" 1 "Enable" ;
+VAL_ 289 GW_Left_Turn_Light_Request 0 "NoRequest" 1 "Request" 2 "Reserved2" 3 "Reserved3" ;
+VAL_ 289 GW_Right_Turn_Light_Request 0 "NoRequest" 1 "Request" 2 "Reserved2" 3 "Reserved3" ;
+VAL_ 289 GW_Position_Light_Request 0 "NoRequest" 1 "Request" 2 "Reserved2" 3 "Reserved3" ;
+VAL_ 289 GW_Low_Beam_Request 0 "NoRequest" 1 "Request" 2 "Reserved2" 3 "Reserved3" ;
+VAL_ 289 SCU_Torque_Or_Speed_Mode 0 "TorqueMode" 1 "SpeedMode" ;
+VAL_ 289 Steering_Angle_Speed_Valid 0 "Invalid" 1 "Valid" ;
+VAL_ 289 Brake_Force_Command_Valid 0 "Invalid" 1 "Valid" ;
+
