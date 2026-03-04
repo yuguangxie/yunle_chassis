@@ -1,0 +1,5 @@
+builtin_interfaces/Time stamp
+float32 hardware_target_speed
+float32 scu_target_speed_feedback
+float32 vehicle_target_speed
+float32 vehicle_target_speed_rpm

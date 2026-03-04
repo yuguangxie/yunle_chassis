@@ -1,0 +1,16 @@
+builtin_interfaces/Time stamp
+uint8 ccu_shift_level_status
+bool ccu_parking_status
+uint8 ccu_ignition_status
+bool ccu_drive_mode_shift_button
+bool steering_wheel_direction
+float32 ccu_steering_wheel_angle
+float32 ccu_vehicle_speed
+uint8 ccu_drive_mode
+bool remote_brake_request_status
+bool emergency_brake_request_status
+bool scu_brake_signal_status
+bool left_turn_light_status
+bool right_turn_light_status
+bool position_light_status
+bool low_beam_status
