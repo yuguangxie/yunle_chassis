@@ -1,0 +1,5 @@
+builtin_interfaces/Time stamp
+float32 bms_total_battery_voltage
+float32 bms_pack_voltage
+float32 bms_pack_current
+float32 bms_realtime_soc

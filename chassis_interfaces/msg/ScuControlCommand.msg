@@ -1,0 +1,13 @@
+uint8 scu_shift_level_request
+uint8 scu_drive_mode_request
+float32 scu_steering_angle_jd01_front
+float32 scu_steering_angle_jd01_rear
+float32 scu_target_speed
+bool scu_brake_enable
+uint8 gw_left_turn_light_request
+uint8 gw_right_turn_light_request
+uint8 gw_position_light_request
+uint8 gw_low_beam_request
+uint8 scu_torque_or_speed_mode
+bool steering_angle_speed_valid
+bool brake_force_command_valid

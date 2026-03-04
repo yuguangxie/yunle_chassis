@@ -1,0 +1,14 @@
+builtin_interfaces/Time stamp
+uint8 bms_charge_current_warning
+uint8 bms_discharge_current_warning
+uint8 bms_soc_warning
+uint8 bms_temperature_warning
+uint8 mcu_current_warning
+uint8 mcu_disconnect_warning
+uint8 mcu_motor_warning
+uint8 mcu_speed_warning
+uint8 mcu_temperature_warning
+uint8 mcu_voltage_warning
+uint8 steering_disconnect_warning
+uint8 steering_lock_warning
+uint8 steering_uncontrollable_warning

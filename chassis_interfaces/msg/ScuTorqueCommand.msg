@@ -1,0 +1,4 @@
+float32 torque_command_front_left
+float32 torque_command_front_right
+float32 torque_command_rear_left
+float32 torque_command_rear_right

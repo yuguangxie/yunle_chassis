@@ -1,0 +1,10 @@
+chassis_driver_node:
+  ros__parameters:
+    local_ip: 192.169.1.102
+    can1_local_port: 8234
+    can2_local_port: 8235
+    can1_remote_ip: 192.168.1.98
+    can2_remote_ip: 192.168.1.99
+    remote_port: 1234
+    udp_buffer_size: 2048
+    socket_timeout_ms: 200
