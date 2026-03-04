@@ -112,8 +112,8 @@ void ChassisDriverNode::loadParameters()
   declare_parameter<int>("default_qos_depth", 10);
   declare_parameter<std::vector<std::string>>("enabled_publish_topics", std::vector<std::string>{"all"});
   declare_parameter<std::vector<std::string>>("enabled_subscribe_topics", std::vector<std::string>{"all"});
-  declare_parameter<std::vector<std::string>>("message_channel_map", {});
-  declare_parameter<std::vector<std::string>>("control_message_channel_map", {});
+  declare_parameter<std::vector<std::string>>("message_channel_map", std::vector<std::string>{});
+  declare_parameter<std::vector<std::string>>("control_message_channel_map", std::vector<std::string>{});
   declare_parameter<std::string>("local_ip", "192.168.1.102");
   declare_parameter<int>("can1_local_port", 8234);
   declare_parameter<int>("can2_local_port", 8235);

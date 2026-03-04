@@ -45,18 +45,18 @@ chassis_driver_node:
     # ==================== CAN message channel routing ====================
     # Route decoded feedback messages to can1/can2 source channel.
     message_channel_map:
-      - "BMS_Status:can1"
-      - "BMS_Realtime_Status:can1"
-      - "VCU_Warning_Level:can1"
+      - "BMS_Status:can2"
+      - "BMS_Realtime_Status:can2"
+      - "VCU_Warning_Level:can2"
       - "VCU_Wheel_Speed_Feedback:can2"
-      - "VCU_CCU_Status:can1"
+      - "VCU_CCU_Status:can2"
       - "SAS_Angle_Feedback:can2"
-      - "SCU_Target_Speed_Feedback:can1"
+      - "SCU_Target_Speed_Feedback:can2"
 
     # Route outgoing control messages to can1/can2 target channel.
     control_message_channel_map:
-      - "SCU_Control_Command:can1"
-      - "SCU_Chassis_Command:can1"
+      - "SCU_Control_Command:can2"
+      - "SCU_Chassis_Command:can2"
       - "SCU_Torque_Command:can2"
 
     # ==================== UDP/CAN network parameters ====================
