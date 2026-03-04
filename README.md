@@ -67,8 +67,8 @@ ros2 launch chassis_driver chassis_driver.launch.py
 ros2 topic pub --once /chassis/control/scu_control_command chassis_interfaces/msg/ScuControlCommand "{
   scu_shift_level_request: 1,
   scu_drive_mode_request: 2,
-  scu_steering_angle_jd01_front: 10.0,
-  scu_steering_angle_jd01_rear: 0.0,
+  scu_steering_angle_front: 10.0,
+  scu_steering_angle_rear: 0.0,
   scu_target_speed: 12.3,
   scu_brake_enable: false,
   gw_left_turn_light_request: 1,

@@ -79,8 +79,8 @@ const std::unordered_map<uint32_t, MessageDefinition> kMessageById = {
   {289U, {"SCU_Control_Command", 289U, false, 8U, "SCU", {
       {"SCU_Shift_Level_Request", 0, 2, ByteOrder::Intel, ValueType::Unsigned, 1.0, 0.0, 0.0, 3.0, ""},
       {"SCU_Drive_Mode_Request", 6, 2, ByteOrder::Intel, ValueType::Unsigned, 1.0, 0.0, 0.0, 3.0, ""},
-      {"SCU_Steering_Angle_JD01_Front", 8, 8, ByteOrder::Intel, ValueType::Unsigned, 1.0, 0.0, 0.0, 255.0, ""},
-      {"SCU_Steering_Angle_JD01_Rear", 16, 8, ByteOrder::Intel, ValueType::Unsigned, 1.0, 0.0, 0.0, 255.0, ""},
+      {"SCU_Steering_Angle_Front", 8, 8, ByteOrder::Intel, ValueType::Unsigned, 1.0, 0.0, 0.0, 255.0, ""},
+      {"SCU_Steering_Angle_Rear", 16, 8, ByteOrder::Intel, ValueType::Unsigned, 1.0, 0.0, 0.0, 255.0, ""},
       {"SCU_Target_Speed", 24, 9, ByteOrder::Intel, ValueType::Unsigned, 0.1, 0.0, 0.0, 51.1, "km/h"},
       {"SCU_Brake_Enable", 33, 1, ByteOrder::Intel, ValueType::Unsigned, 1.0, 0.0, 0.0, 1.0, ""},
       {"GW_Left_Turn_Light_Request", 40, 2, ByteOrder::Intel, ValueType::Unsigned, 1.0, 0.0, 0.0, 3.0, ""},

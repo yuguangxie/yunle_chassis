@@ -20,8 +20,8 @@ ControlCommandBridge::ControlCommandBridge(ChassisDriverNode & node)
       frame.dlc = 8;
       DbcProtocol::encodeSignal(frame, "SCU_Shift_Level_Request", msg->scu_shift_level_request);
       DbcProtocol::encodeSignal(frame, "SCU_Drive_Mode_Request", msg->scu_drive_mode_request);
-      DbcProtocol::encodeSignal(frame, "SCU_Steering_Angle_JD01_Front", msg->scu_steering_angle_jd01_front);
-      DbcProtocol::encodeSignal(frame, "SCU_Steering_Angle_JD01_Rear", msg->scu_steering_angle_jd01_rear);
+      DbcProtocol::encodeSignal(frame, "SCU_Steering_Angle_Front", msg->scu_steering_angle_front);
+      DbcProtocol::encodeSignal(frame, "SCU_Steering_Angle_Rear", msg->scu_steering_angle_rear);
       DbcProtocol::encodeSignal(frame, "SCU_Target_Speed", msg->scu_target_speed);
       DbcProtocol::encodeSignal(frame, "SCU_Brake_Enable", msg->scu_brake_enable ? 1.0 : 0.0);
       DbcProtocol::encodeSignal(frame, "GW_Left_Turn_Light_Request", msg->gw_left_turn_light_request);

@@ -124,8 +124,8 @@ BO_ 294 SCU_Chassis_Command: 8 SCU
 BO_ 289 SCU_Control_Command: 8 SCU
  SG_ SCU_Shift_Level_Request : 0|2@1+ (1,0) [0|3] ""  VCU
  SG_ SCU_Drive_Mode_Request : 6|2@1+ (1,0) [0|3] ""  VCU
- SG_ SCU_Steering_Angle_JD01_Front : 8|8@1+ (1,0) [0|255] ""  VCU
- SG_ SCU_Steering_Angle_JD01_Rear : 16|8@1+ (1,0) [0|255] ""  VCU
+ SG_ SCU_Steering_Angle_Front : 8|8@1+ (1,0) [0|255] ""  VCU
+ SG_ SCU_Steering_Angle_Rear : 16|8@1+ (1,0) [0|255] ""  VCU
  SG_ SCU_Target_Speed : 24|9@1+ (0.1,0) [0|51.1] "km/h"  VCU
  SG_ SCU_Brake_Enable : 33|1@1+ (1,0) [0|1] ""  VCU
  SG_ GW_Left_Turn_Light_Request : 40|2@1+ (1,0) [0|3] ""  TBOX
@@ -223,8 +223,8 @@ CM_ SG_ 294 Brake_Force_Rear_Right "Requested brake force for rear-right channel
 CM_ BO_ 289 "Primary SCU control command message.";
 CM_ SG_ 289 SCU_Shift_Level_Request "Requested shift level sent to the SCU.";
 CM_ SG_ 289 SCU_Drive_Mode_Request "Requested drive mode sent to the SCU.";
-CM_ SG_ 289 SCU_Steering_Angle_JD01_Front "Front steering angle command encoded in JD01 format.";
-CM_ SG_ 289 SCU_Steering_Angle_JD01_Rear "Rear steering angle command encoded in JD01 format.";
+CM_ SG_ 289 SCU_Steering_Angle_Front "Front steering angle command encoded.";
+CM_ SG_ 289 SCU_Steering_Angle_Rear "Rear steering angle command encoded.";
 CM_ SG_ 289 SCU_Target_Speed "Vehicle target speed sent to the SCU.";
 CM_ SG_ 289 SCU_Brake_Enable "Brake enable request sent to the SCU.";
 CM_ SG_ 289 GW_Left_Turn_Light_Request "Gateway request for left turn lamp.";
