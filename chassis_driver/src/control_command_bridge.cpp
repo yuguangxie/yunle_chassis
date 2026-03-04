@@ -6,6 +6,7 @@
 namespace chassis_driver
 {
 
+/** Subscribe control topics and convert each message into DBC-encoded CAN frame. */
 ControlCommandBridge::ControlCommandBridge(ChassisDriverNode & node)
 : node_(node)
 {

@@ -13,6 +13,7 @@ namespace chassis_driver
 
 namespace
 {
+/** Parse k:v parameter entries into hash map. */
 std::unordered_map<std::string, std::string> parseMap(const std::vector<std::string> & entries)
 {
   std::unordered_map<std::string, std::string> out;
@@ -26,6 +27,7 @@ std::unordered_map<std::string, std::string> parseMap(const std::vector<std::str
   return out;
 }
 
+/** Convert internal CAN frame to ROS message with timestamp. */
 chassis_interfaces::msg::CanFrame toRosFrame(const CanFrame & frame, const rclcpp::Time & stamp)
 {
   chassis_interfaces::msg::CanFrame msg;
@@ -40,6 +42,7 @@ chassis_interfaces::msg::CanFrame toRosFrame(const CanFrame & frame, const rclcp
 }
 }  // namespace
 
+/** Build node, setup publishers/subscribers, network channels and RX threads. */
 ChassisDriverNode::ChassisDriverNode()
 : Node("chassis_driver_node")
 {
@@ -67,11 +70,13 @@ ChassisDriverNode::ChassisDriverNode()
   startThreads();
 }
 
+/** Ensure threads are stopped before destruction. */
 ChassisDriverNode::~ChassisDriverNode()
 {
   stopThreads();
 }
 
+/** Declare/read ROS parameters and build message-channel lookup tables. */
 void ChassisDriverNode::loadParameters()
 {
   declare_parameter<std::string>("topic_prefix", "/chassis");
@@ -120,6 +125,7 @@ void ChassisDriverNode::loadParameters()
   }
 }
 
+/** Open CAN1/CAN2 UDP channels using configured addresses and ports. */
 void ChassisDriverNode::initializeChannels()
 {
   if (!can1_.open(local_ip_, static_cast<uint16_t>(can1_local_port_), can1_remote_ip_,
@@ -134,6 +140,7 @@ void ChassisDriverNode::initializeChannels()
   }
 }
 
+/** Start background RX loops for both channels. */
 void ChassisDriverNode::startThreads()
 {
   running_.store(true);
@@ -141,6 +148,7 @@ void ChassisDriverNode::startThreads()
   can2_rx_thread_ = std::thread([this]() { rxLoop(2); });
 }
 
+/** Stop RX loops and join all worker threads. */
 void ChassisDriverNode::stopThreads()
 {
   running_.store(false);
@@ -150,6 +158,7 @@ void ChassisDriverNode::stopThreads()
   if (can2_rx_thread_.joinable()) can2_rx_thread_.join();
 }
 
+/** Channel receive loop: fetch UDP payload, decode frames, and route each frame. */
 void ChassisDriverNode::rxLoop(uint8_t channel_id)
 {
   auto & channel = channel_id == 1 ? can1_ : can2_;
@@ -171,6 +180,7 @@ void ChassisDriverNode::rxLoop(uint8_t channel_id)
   }
 }
 
+/** Encode and send control frame over resolved channel and publish TX raw topic. */
 void ChassisDriverNode::sendControlFrame(const CanFrame & frame, const std::string & message_name)
 {
   const auto packed = CanEthernetCodec::encodeFrame(frame);
@@ -187,6 +197,7 @@ void ChassisDriverNode::sendControlFrame(const CanFrame & frame, const std::stri
   publishRawTx(tx);
 }
 
+/** Decode known CAN IDs and publish typed feedback topics. */
 void ChassisDriverNode::publishDecoded(const CanFrame & frame)
 {
   const rclcpp::Time stamp = now();
@@ -286,18 +297,21 @@ void ChassisDriverNode::publishDecoded(const CanFrame & frame)
   }
 }
 
+/** Publish raw RX frame when enabled. */
 void ChassisDriverNode::publishRawRx(const CanFrame & frame)
 {
   if (!publish_raw_can_) return;
   raw_rx_pub_->publish(toRosFrame(frame, now()));
 }
 
+/** Publish raw TX frame when enabled. */
 void ChassisDriverNode::publishRawTx(const CanFrame & frame)
 {
   if (!publish_raw_can_) return;
   raw_tx_pub_->publish(toRosFrame(frame, now()));
 }
 
+/** Publish unknown-frame debug message when enabled. */
 void ChassisDriverNode::publishUnknownFrame(const CanFrame & frame)
 {
   if (!publish_unknown_frames_ || !enable_debug_topics_) return;
@@ -308,6 +322,7 @@ void ChassisDriverNode::publishUnknownFrame(const CanFrame & frame)
   unknown_frame_pub_->publish(msg);
 }
 
+/** Resolve channel ID from configured map with fallback to channel 1. */
 uint8_t ChassisDriverNode::resolveChannel(const std::string & message_name, bool tx) const
 {
   const auto & map = tx ? control_channel_map_ : feedback_channel_map_;
