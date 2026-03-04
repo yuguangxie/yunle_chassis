@@ -99,6 +99,7 @@ const std::unordered_map<uint32_t, MessageDefinition> kMessageById = {
     }}},
 };
 
+/** Build name-indexed map from ID-indexed message definitions. */
 std::unordered_map<std::string, MessageDefinition> createByName()
 {
   std::unordered_map<std::string, MessageDefinition> by_name;
@@ -112,9 +113,12 @@ const std::unordered_map<std::string, MessageDefinition> kMessageByName = create
 
 }  // namespace
 
+/** Return ID-indexed static message dictionary. */
 const std::unordered_map<uint32_t, MessageDefinition> & DbcProtocol::messageById() { return kMessageById; }
+/** Return name-indexed static message dictionary. */
 const std::unordered_map<std::string, MessageDefinition> & DbcProtocol::messageByName() { return kMessageByName; }
 
+/** Decode one physical signal value from frame payload. */
 std::optional<double> DbcProtocol::decodeSignal(const CanFrame & frame, const std::string & signal_name)
 {
   const auto msg_it = kMessageById.find(frame.can_id);
@@ -132,6 +136,7 @@ std::optional<double> DbcProtocol::decodeSignal(const CanFrame & frame, const st
   return std::nullopt;
 }
 
+/** Encode one physical signal value into frame payload. */
 bool DbcProtocol::encodeSignal(CanFrame & frame, const std::string & signal_name, double physical_value, bool clamp)
 {
   const auto msg_it = kMessageById.find(frame.can_id);
@@ -171,6 +176,7 @@ bool DbcProtocol::encodeSignal(CanFrame & frame, const std::string & signal_name
   return false;
 }
 
+/** Extract little-endian bit field from 8-byte CAN payload. */
 uint64_t DbcProtocol::extractIntel(const std::array<uint8_t, 8> & data, uint16_t start_bit, uint16_t bit_length)
 {
   uint64_t value = 0;
@@ -182,6 +188,7 @@ uint64_t DbcProtocol::extractIntel(const std::array<uint8_t, 8> & data, uint16_t
   return value;
 }
 
+/** Extract big-endian (Motorola) bit field from 8-byte CAN payload. */
 uint64_t DbcProtocol::extractMotorola(const std::array<uint8_t, 8> & data, uint16_t start_bit, uint16_t bit_length)
 {
   uint64_t value = 0;
@@ -196,6 +203,7 @@ uint64_t DbcProtocol::extractMotorola(const std::array<uint8_t, 8> & data, uint1
   return value;
 }
 
+/** Insert little-endian bit field into 8-byte CAN payload. */
 void DbcProtocol::insertIntel(std::array<uint8_t, 8> & data, uint16_t start_bit, uint16_t bit_length, uint64_t raw_value)
 {
   for (uint16_t i = 0; i < bit_length; ++i) {
@@ -205,6 +213,7 @@ void DbcProtocol::insertIntel(std::array<uint8_t, 8> & data, uint16_t start_bit,
   }
 }
 
+/** Insert big-endian (Motorola) bit field into 8-byte CAN payload. */
 void DbcProtocol::insertMotorola(
   std::array<uint8_t, 8> & data, uint16_t start_bit, uint16_t bit_length, uint64_t raw_value)
 {
@@ -219,6 +228,7 @@ void DbcProtocol::insertMotorola(
   }
 }
 
+/** Sign-extend raw integer value according to bit width. */
 int64_t DbcProtocol::signExtend(uint64_t raw_value, uint16_t bit_length)
 {
   if (bit_length == 0 || bit_length >= 64) {

@@ -2,6 +2,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 
+/** ROS2 process entrypoint: initialize, spin chassis node, shutdown. */
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);

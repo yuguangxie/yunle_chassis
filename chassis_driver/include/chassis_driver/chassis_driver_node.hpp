@@ -32,25 +32,65 @@ namespace chassis_driver
 
 class ControlCommandBridge;
 
+/**
+ * @brief ROS2 chassis driver node handling UDP-CAN bridging and topic I/O.
+ */
 class ChassisDriverNode : public rclcpp::Node
 {
 public:
+  /** @brief Construct node, load parameters, initialize channels and worker threads. */
   ChassisDriverNode();
+
+  /** @brief Stop worker threads and release resources. */
   ~ChassisDriverNode() override;
 
+  /**
+   * @brief Encode and send one control CAN frame to mapped channel.
+   * @param frame CAN frame to transmit.
+   * @param message_name DBC message name used for channel lookup.
+   */
   void sendControlFrame(const CanFrame & frame, const std::string & message_name);
+
+  /**
+   * @brief Decode CAN frame by DBC and publish mapped ROS feedback message.
+   * @param frame CAN frame received from chassis.
+   */
   void publishDecoded(const CanFrame & frame);
+
+  /** @brief Publish raw received CAN frame topic for diagnostics. */
   void publishRawRx(const CanFrame & frame);
+
+  /** @brief Publish raw transmitted CAN frame topic for diagnostics. */
   void publishRawTx(const CanFrame & frame);
+
+  /** @brief Publish unknown frame info when no DBC message mapping is found. */
   void publishUnknownFrame(const CanFrame & frame);
 
+  /**
+   * @brief Resolve configured channel ID for a message name.
+   * @param message_name DBC message name.
+   * @param tx True for control message map, false for feedback map.
+   * @return Channel ID (1 or 2), defaults to 1 when map entry is missing.
+   */
   uint8_t resolveChannel(const std::string & message_name, bool tx) const;
 
 private:
+  /** @brief Declare and fetch ROS parameters into member fields. */
   void loadParameters();
+
+  /** @brief Open UDP channels according to loaded network parameters. */
   void initializeChannels();
+
+  /** @brief Start RX worker threads for both CAN channels. */
   void startThreads();
+
+  /** @brief Request stop and join RX worker threads. */
   void stopThreads();
+
+  /**
+   * @brief Receive loop of one channel: UDP receive -> decode -> publish/route.
+   * @param channel_id Logical channel ID (1 or 2).
+   */
   void rxLoop(uint8_t channel_id);
 
   std::string topic_prefix_;

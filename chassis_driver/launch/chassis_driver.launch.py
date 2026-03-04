@@ -5,6 +5,7 @@ import os
 
 
 def generate_launch_description():
+    """Create launch description that starts chassis_driver_node with network and driver parameters."""
     pkg_share = get_package_share_directory('chassis_driver')
     network_config = os.path.join(pkg_share, 'config', 'network.yaml')
     driver_config = os.path.join(pkg_share, 'config', 'driver.yaml')

@@ -5,11 +5,13 @@
 namespace chassis_driver
 {
 
+/** Construct router with node callback target. */
 FrameRouter::FrameRouter(ChassisDriverNode & node)
 : node_(node)
 {
 }
 
+/** Route one received frame to node decode/publish logic. */
 void FrameRouter::routeFrame(const CanFrame & frame)
 {
   node_.publishDecoded(frame);
