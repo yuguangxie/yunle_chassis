@@ -81,7 +81,7 @@ void ChassisDriverNode::loadParameters()
   declare_parameter<int>("default_qos_depth", 10);
   declare_parameter<std::vector<std::string>>("message_channel_map", {});
   declare_parameter<std::vector<std::string>>("control_message_channel_map", {});
-  declare_parameter<std::string>("local_ip", "192.169.1.102");
+  declare_parameter<std::string>("local_ip", "192.168.1.102");
   declare_parameter<int>("can1_local_port", 8234);
   declare_parameter<int>("can2_local_port", 8235);
   declare_parameter<std::string>("can1_remote_ip", "192.168.1.98");
