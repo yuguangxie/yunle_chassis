@@ -48,14 +48,14 @@ bool UdpChannel::open(const std::string & local_ip, uint16_t local_port, const s
     return false;
   }
 
-  remote_addr_ptr_ = new sockaddr_in();
-  std::memset(remote_addr_ptr_, 0, sizeof(sockaddr_in));
-  remote_addr_ptr_->sin_family = AF_INET;
-  remote_addr_ptr_->sin_port = htons(remote_port);
-  if (::inet_pton(AF_INET, remote_ip.c_str(), &remote_addr_ptr_->sin_addr) != 1) {
+  std::memset(&remote_addr_, 0, sizeof(sockaddr_in));
+  remote_addr_.sin_family = AF_INET;
+  remote_addr_.sin_port = htons(remote_port);
+  if (::inet_pton(AF_INET, remote_ip.c_str(), &remote_addr_.sin_addr) != 1) {
     close();
     return false;
   }
+  remote_addr_valid_ = true;
 
   rx_buffer_.assign(static_cast<size_t>(recv_buffer_size > 0 ? recv_buffer_size : 2048), 0U);
   opened_ = true;
@@ -82,11 +82,11 @@ bool UdpChannel::receive(std::vector<uint8_t> & out_payload)
 /** Send one UDP packet to configured remote endpoint. */
 bool UdpChannel::send(const std::vector<uint8_t> & payload)
 {
-  if (!opened_ || remote_addr_ptr_ == nullptr) {
+  if (!opened_ || !remote_addr_valid_) {
     return false;
   }
   const ssize_t n = ::sendto(fd_, payload.data(), payload.size(), 0,
-    reinterpret_cast<sockaddr *>(remote_addr_ptr_), sizeof(sockaddr_in));
+    reinterpret_cast<sockaddr *>(&remote_addr_), sizeof(sockaddr_in));
   return n == static_cast<ssize_t>(payload.size());
 }
 
@@ -98,10 +98,7 @@ void UdpChannel::close()
     ::close(fd_);
     fd_ = -1;
   }
-  if (remote_addr_ptr_ != nullptr) {
-    delete remote_addr_ptr_;
-    remote_addr_ptr_ = nullptr;
-  }
+  remote_addr_valid_ = false;
   opened_ = false;
 }
 

@@ -5,10 +5,9 @@ import os
 
 
 def generate_launch_description():
-    """Create launch description that starts chassis_driver_node with network and driver parameters."""
+    """Create launch description that starts chassis_driver_node with unified parameters."""
     pkg_share = get_package_share_directory('chassis_driver')
-    network_config = os.path.join(pkg_share, 'config', 'network.yaml')
-    driver_config = os.path.join(pkg_share, 'config', 'driver.yaml')
+    node_config = os.path.join(pkg_share, 'config', 'chassis_driver.yaml')
 
     return LaunchDescription([
         Node(
@@ -16,6 +15,6 @@ def generate_launch_description():
             executable='chassis_driver_node',
             name='chassis_driver_node',
             output='screen',
-            parameters=[network_config, driver_config],
+            parameters=[node_config],
         )
     ])

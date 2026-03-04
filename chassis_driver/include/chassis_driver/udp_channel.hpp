@@ -46,7 +46,8 @@ public:
 private:
   int fd_{-1};
   bool opened_{false};
-  struct sockaddr_in * remote_addr_ptr_{nullptr};
+  struct sockaddr_in remote_addr_{};
+  bool remote_addr_valid_{false};
   std::vector<uint8_t> rx_buffer_;
 };
 
