@@ -1,4 +1,4 @@
-builtin_interfaces/Time stamp
+time stamp
 uint8 ccu_shift_level_status
 bool ccu_parking_status
 uint8 ccu_ignition_status
