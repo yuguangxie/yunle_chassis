@@ -13,7 +13,7 @@ const std::unordered_map<uint32_t, MessageDefinition> kMessageById = {
   {256U, {"BMS_Status", 256U, false, 8U, "BMS", {
       {"BMS_Voltage", 0, 16, ByteOrder::Intel, ValueType::Unsigned, 0.1, 0.0, 0.0, 6553.5, "V"},
       {"BMS_Current", 16, 16, ByteOrder::Intel, ValueType::Signed, 0.1, 0.0, -3276.8, 3276.7, "A"},
-      {"BMS_SOC", 32, 16, ByteOrder::Intel, ValueType::Unsigned, 0.1, 0.0, 0.0, 100.0, "%"},
+      {"BMS_SOC", 32, 16, ByteOrder::Intel, ValueType::Unsigned, 1, 0.0, 0.0, 100.0, "%"},
     }}},
   {119U, {"VCU_Warning_Level", 119U, false, 8U, "VCU", {
       {"BMS_Charge_Current_Warning", 0, 3, ByteOrder::Intel, ValueType::Unsigned, 1.0, 0.0, 0.0, 7.0, ""},
