@@ -1,13 +1,11 @@
 #include "chassis_driver/chassis_driver_node.hpp"
 
-#include <rclcpp/rclcpp.hpp>
+#include <ros/ros.h>
 
-/** ROS2 process entrypoint: initialize, spin chassis node, shutdown. */
 int main(int argc, char ** argv)
 {
-  rclcpp::init(argc, argv);
-  auto node = std::make_shared<chassis_driver::ChassisDriverNode>();
-  rclcpp::spin(node);
-  rclcpp::shutdown();
+  ros::init(argc, argv, "chassis_driver_node");
+  chassis_driver::ChassisDriverNode node;
+  ros::spin();
   return 0;
 }

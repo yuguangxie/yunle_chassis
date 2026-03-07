@@ -1,78 +1,41 @@
-chassis_driver_node:
-  ros__parameters:
-    # ==================== Topic configuration ====================
-    # Topic namespace prefix. All publish/subscribe topics become:
-    #   <topic_prefix>/<relative_topic>
-    # Example: /yunle_chassis/feedback/bms_status
-    topic_prefix: /yunle_chassis
+# ROS1 private parameters for node chassis_driver_node
+# Load this file in launch under the node scope.
 
-    # Toggle raw and debug outputs.
-    publish_raw_can: true
-    publish_unknown_frames: true
-    enable_debug_topics: true
+topic_prefix: /yunle_chassis
 
-    # Default QoS queue depth used for publishers/subscribers.
-    default_qos_depth: 10
+publish_raw_can: true
+publish_unknown_frames: true
+enable_debug_topics: true
 
-    # Fine-grained topic switch for publishers.
-    # Use ["all"] to enable all publish topics;
-    # otherwise list only the keys you need.
-    # Available publish keys:
-    #   can_rx_raw
-    #   can_tx_raw
-    #   debug_status
-    #   debug_unknown_frames
-    #   feedback_bms_status
-    #   feedback_bms_realtime_status
-    #   feedback_vcu_warning_level
-    #   feedback_wheel_speed
-    #   feedback_ccu_status
-    #   feedback_sas_angle
-    #   feedback_target_speed_feedback
-    enabled_publish_topics:
-      - all
+default_qos_depth: 10
 
-    # Fine-grained topic switch for subscribers.
-    # Use ["all"] to enable all subscribe topics;
-    # otherwise list only the keys you need.
-    # Available subscribe keys:
-    #   control_scu_control_command
-    #   control_scu_chassis_command
-    #   control_scu_torque_command
-    enabled_subscribe_topics:
-      - all
+enabled_publish_topics:
+  - all
 
-    # ==================== CAN message channel routing ====================
-    # Route decoded feedback messages to can1/can2 source channel.
-    message_channel_map:
-      - "BMS_Status:can2"
-      - "BMS_Realtime_Status:can2"
-      - "VCU_Warning_Level:can2"
-      - "VCU_Wheel_Speed_Feedback:can2"
-      - "VCU_CCU_Status:can2"
-      - "SAS_Angle_Feedback:can2"
-      - "SCU_Target_Speed_Feedback:can2"
+enabled_subscribe_topics:
+  - all
 
-    # Route outgoing control messages to can1/can2 target channel.
-    control_message_channel_map:
-      - "SCU_Control_Command:can2"
-      - "SCU_Chassis_Command:can2"
-      - "SCU_Torque_Command:can2"
+message_channel_map:
+  - "BMS_Status:can2"
+  - "BMS_Realtime_Status:can2"
+  - "VCU_Warning_Level:can2"
+  - "VCU_Wheel_Speed_Feedback:can2"
+  - "VCU_CCU_Status:can2"
+  - "SAS_Angle_Feedback:can2"
+  - "SCU_Target_Speed_Feedback:can2"
 
-    # ==================== UDP/CAN network parameters ====================
-    # Local bind IP for both CAN sockets.
-    local_ip: 192.168.1.102
-    # Local UDP bind ports for CAN1 and CAN2.
-    can1_local_port: 8234
-    can2_local_port: 8235
+control_message_channel_map:
+  - "SCU_Control_Command:can2"
+  - "SCU_Chassis_Command:can2"
+  - "SCU_Torque_Command:can2"
 
-    # Remote CAN gateway IP for each channel.
-    can1_remote_ip: 192.168.1.98
-    can2_remote_ip: 192.168.1.99
-    # Remote UDP destination port.
-    remote_port: 1234
+local_ip: 192.168.1.102
+can1_local_port: 8234
+can2_local_port: 8235
 
-    # UDP receive buffer size (bytes).
-    udp_buffer_size: 2048
-    # Socket receive timeout in milliseconds.
-    socket_timeout_ms: 200
+can1_remote_ip: 192.168.1.98
+can2_remote_ip: 192.168.1.99
+remote_port: 1234
+
+udp_buffer_size: 2048
+socket_timeout_ms: 200

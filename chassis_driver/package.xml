@@ -1,19 +1,18 @@
 <?xml version="1.0"?>
-<package format="3">
+<package format="2">
   <name>chassis_driver</name>
   <version>0.1.0</version>
-  <description>Single-node ROS2 Humble chassis CAN-over-Ethernet driver with hardcoded DBC protocol.</description>
+  <description>Single-node ROS1 chassis CAN-over-Ethernet driver with hardcoded DBC protocol.</description>
   <maintainer email="dev@example.com">Yunle Dev</maintainer>
   <license>Apache-2.0</license>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>catkin</buildtool_depend>
 
-  <depend>rclcpp</depend>
-  <depend>std_msgs</depend>
-  <depend>builtin_interfaces</depend>
-  <depend>chassis_interfaces</depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>chassis_interfaces</build_depend>
 
-  <export>
-    <build_type>ament_cmake</build_type>
-  </export>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>chassis_interfaces</exec_depend>
 </package>

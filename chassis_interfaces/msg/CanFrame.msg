@@ -1,4 +1,4 @@
-builtin_interfaces/Time stamp
+time stamp
 uint32 can_id
 bool is_extended
 bool is_remote

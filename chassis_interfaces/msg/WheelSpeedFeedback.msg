@@ -1,4 +1,4 @@
-builtin_interfaces/Time stamp
+time stamp
 float32 wheel_speed_front_left_rpm
 float32 wheel_speed_front_right_rpm
 float32 wheel_speed_rear_left_rpm

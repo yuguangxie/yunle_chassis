@@ -1,4 +1,4 @@
-builtin_interfaces/Time stamp
+time stamp
 uint8 bms_charge_current_warning
 uint8 bms_discharge_current_warning
 uint8 bms_soc_warning

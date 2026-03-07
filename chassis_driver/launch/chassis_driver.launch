@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="chassis_driver" type="chassis_driver_node" name="chassis_driver_node" output="screen">
+    <rosparam command="load" file="$(find chassis_driver)/config/chassis_driver.yaml" />
+  </node>
+</launch>
