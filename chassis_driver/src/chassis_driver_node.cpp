@@ -65,10 +65,6 @@ ChassisDriverNode::ChassisDriverNode()
   if (isPublishTopicEnabled("feedback_bms_status")) {
     bms_status_pub_ = create_publisher<chassis_interfaces::msg::BmsStatus>(makeTopicName("feedback/bms_status"), qos);
   }
-  if (isPublishTopicEnabled("feedback_bms_realtime_status")) {
-    bms_realtime_pub_ = create_publisher<chassis_interfaces::msg::BmsRealtimeStatus>(
-      makeTopicName("feedback/bms_realtime_status"), qos);
-  }
   if (isPublishTopicEnabled("feedback_vcu_warning_level")) {
     vcu_warning_pub_ = create_publisher<chassis_interfaces::msg::VcuWarningLevel>(
       makeTopicName("feedback/vcu_warning_level"), qos);
@@ -162,7 +158,8 @@ void ChassisDriverNode::loadParameters()
   get_parameter("udp_buffer_size", udp_buffer_size_);
   get_parameter("socket_timeout_ms", socket_timeout_ms_);
 
-  for (const auto & required : {"SCU_Control_Command", "SCU_Chassis_Command", "SCU_Torque_Command"}) {
+  for (const auto & required : {"SCU_Control_Command", "SCU_Chassis_Command", "SCU_Torque_Command",
+      "VCU_Debug_Enable", "VCU_Drive_Debug"}) {
     if (control_channel_map_.find(required) == control_channel_map_.end()) {
       RCLCPP_FATAL(get_logger(), "Missing required TX mapping: %s", required);
       throw std::runtime_error("missing tx mapping");
@@ -256,16 +253,6 @@ void ChassisDriverNode::publishDecoded(const CanFrame & frame)
       msg.bms_current = static_cast<float>(get("BMS_Current"));
       msg.bms_soc = static_cast<float>(get("BMS_SOC"));
       if (bms_status_pub_) { bms_status_pub_->publish(msg); }
-      break;
-    }
-    case 2542813185U: {
-      chassis_interfaces::msg::BmsRealtimeStatus msg;
-      msg.stamp = stamp;
-      msg.bms_total_battery_voltage = static_cast<float>(get("BMS_Total_Battery_Voltage"));
-      msg.bms_pack_voltage = static_cast<float>(get("BMS_Pack_Voltage"));
-      msg.bms_pack_current = static_cast<float>(get("BMS_Pack_Current"));
-      msg.bms_realtime_soc = static_cast<float>(get("BMS_Realtime_SOC"));
-      if (bms_realtime_pub_) { bms_realtime_pub_->publish(msg); }
       break;
     }
     case 119U: {

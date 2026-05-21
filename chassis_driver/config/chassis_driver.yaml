@@ -23,7 +23,6 @@ chassis_driver_node:
     #   debug_status
     #   debug_unknown_frames
     #   feedback_bms_status
-    #   feedback_bms_realtime_status
     #   feedback_vcu_warning_level
     #   feedback_wheel_speed
     #   feedback_ccu_status
@@ -39,6 +38,7 @@ chassis_driver_node:
     #   control_scu_control_command
     #   control_scu_chassis_command
     #   control_scu_torque_command
+    #   control_vcu_chassis_debug
     enabled_subscribe_topics:
       - all
 
@@ -46,7 +46,6 @@ chassis_driver_node:
     # Route decoded feedback messages to can1/can2 source channel.
     message_channel_map:
       - "BMS_Status:can2"
-      - "BMS_Realtime_Status:can2"
       - "VCU_Warning_Level:can2"
       - "VCU_Wheel_Speed_Feedback:can2"
       - "VCU_CCU_Status:can2"
@@ -58,6 +57,8 @@ chassis_driver_node:
       - "SCU_Control_Command:can2"
       - "SCU_Chassis_Command:can2"
       - "SCU_Torque_Command:can2"
+      - "VCU_Debug_Enable:can2"
+      - "VCU_Drive_Debug:can2"
 
     # ==================== UDP/CAN network parameters ====================
     # Local bind IP for both CAN sockets.

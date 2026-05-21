@@ -92,7 +92,7 @@ Launch：
 | `enabled_publish_topics` | `["all"]` | publisher 细粒度启用列表。 |
 | `enabled_subscribe_topics` | `["all"]` | subscriber 细粒度启用列表。 |
 | `message_channel_map` | 已列出的反馈均为 `can2` | 将解码反馈消息名映射到 CAN 通道。当前已加载，但未用于过滤 RX 帧。 |
-| `control_message_channel_map` | 已列出的控制消息均为 `can2` | 将下行控制消息名映射到 CAN 通道；三个控制消息均要求存在映射。 |
+| `control_message_channel_map` | 已列出的控制/调试消息均为 `can2` | 将下行控制/调试 CAN 消息名映射到 CAN 通道；SCU 控制报文以及 `VCU_Debug_Enable`、`VCU_Drive_Debug` 均要求存在映射。 |
 | `local_ip` | `192.168.1.102` | UDP socket 本地绑定 IP。 |
 | `can1_local_port` | `8234` | CAN1 本地 UDP 端口。 |
 | `can2_local_port` | `8235` | CAN2 本地 UDP 端口。 |
@@ -115,7 +115,6 @@ Launch：
 | `/yunle_chassis/debug/status` | `std_msgs/msg/String` | publisher 存在，但未发现 publish 调用 | 当前源码未使用 | 构造函数中创建 |
 | `/yunle_chassis/debug/unknown_frames` | `std_msgs/msg/String` | `publishDecoded()` default 分支遇到未知 CAN ID 时发布 | 任意未被 switch 处理的接收帧 | `ChassisDriverNode::publishUnknownFrame()` |
 | `/yunle_chassis/feedback/bms_status` | `chassis_interfaces/msg/BmsStatus` | 收到 CAN ID 256 时 | `BMS_Status` | `ChassisDriverNode::publishDecoded()` |
-| `/yunle_chassis/feedback/bms_realtime_status` | `chassis_interfaces/msg/BmsRealtimeStatus` | 收到 CAN ID 2542813185 时 | `BMS_Realtime_Status`，扩展帧 ID | `ChassisDriverNode::publishDecoded()` |
 | `/yunle_chassis/feedback/vcu_warning_level` | `chassis_interfaces/msg/VcuWarningLevel` | 收到 CAN ID 119 时 | `VCU_Warning_Level` | `ChassisDriverNode::publishDecoded()` |
 | `/yunle_chassis/feedback/wheel_speed` | `chassis_interfaces/msg/WheelSpeedFeedback` | 收到 CAN ID 360 时 | `VCU_Wheel_Speed_Feedback` | `ChassisDriverNode::publishDecoded()` |
 | `/yunle_chassis/feedback/ccu_status` | `chassis_interfaces/msg/CcuStatus` | 收到 CAN ID 81 时 | `VCU_CCU_Status` | `ChassisDriverNode::publishDecoded()` |
@@ -131,6 +130,7 @@ Launch：
 | `/yunle_chassis/control/scu_control_command` | `chassis_interfaces/msg/ScuControlCommand` | `control_command_bridge.cpp:16`，`ControlCommandBridge::ControlCommandBridge()` 内 lambda | 档位、驱动模式、前/后转向角、目标速度、制动使能、灯光请求、模式和有效位 | CAN ID 289 `SCU_Control_Command`，通过 `sendControlFrame()` 发送 |
 | `/yunle_chassis/control/scu_chassis_command` | `chassis_interfaces/msg/ScuChassisCommand` | `control_command_bridge.cpp:41`，`ControlCommandBridge::ControlCommandBridge()` 内 lambda | 转向角速度和四路制动力命令 | CAN ID 294 `SCU_Chassis_Command`，通过 `sendControlFrame()` 发送 |
 | `/yunle_chassis/control/scu_torque_command` | `chassis_interfaces/msg/ScuTorqueCommand` | `control_command_bridge.cpp:57`，`ControlCommandBridge::ControlCommandBridge()` 内 lambda | 四轮扭矩命令 | CAN ID 291 `SCU_Torque_Command`，通过 `sendControlFrame()` 发送 |
+| `/yunle_chassis/control/vcu_chassis_debug` | `chassis_interfaces/msg/VcuChassisDebug` | `ControlCommandBridge::ControlCommandBridge()` 内 lambda | 整合后的底盘调试控制命令，逻辑名 `VCU_Chassis_Debug` | CAN ID 1808 `VCU_Debug_Enable` 和 CAN ID 1813 `VCU_Drive_Debug`，通过 `sendControlFrame()` 发送 |
 
 ### Services 与 Actions
 
@@ -195,15 +195,15 @@ CAN 信号字节序：
 | 256 | RX | DBC 周期 100 ms；运行时由 UDP 接收事件触发 | `dbc_protocol.cpp:13`, `chassis_driver_node.cpp:252` | `decodeSignal`, `publishDecoded` | `BMS_Voltage`, `BMS_Current`, `BMS_SOC` | `0|16`, `16|16`, `32|16` | 0.1, 0.1, 1 | 0 | V, A, % | `/feedback/bms_status` | 新 DBC 量程：电压 0-100 V，电流 -500-500 A。 |
 | 360 | RX | DBC 周期 20 ms；运行时由 UDP 接收事件触发 | `dbc_protocol.cpp:29`, `chassis_driver_node.cpp:286` | `decodeSignal`, `publishDecoded` | 四个轮速 RPM 字段 | `0|16`, `16|16`, `32|16`, `48|16` | 0.1 | 0 | rpm | `/feedback/wheel_speed` | signed 16-bit。 |
 | 2033 | RX | DBC 周期 20 ms；运行时由 UDP 接收事件触发 | `dbc_protocol.cpp:59`, `chassis_driver_node.cpp:328` | `decodeSignal`, `publishDecoded` | `Hardware_Target_Speed`, `SCU_Target_Speed_Feedback`, `Vehicle_Target_Speed`, `Vehicle_Target_Speed_RPM` | `0|16`, `16|16`, `32|16`, `48|16` | 0.1 | 0 | km/h, rpm | `/feedback/target_speed_feedback` | signed 16-bit。 |
-| 2542813185 | RX | UDP 接收事件触发 | `dbc_protocol.cpp:94`, `chassis_driver_node.cpp:261` | `decodeSignal`, `publishDecoded` | `BMS_Total_Battery_Voltage`, `BMS_Pack_Voltage`, `BMS_Pack_Current`, `BMS_Realtime_SOC` | `0|16`, `16|16`, `32|16`, `48|16` | 0.1 | 0, 0, -3000, 0 | V, V, A, % | `/feedback/bms_realtime_status` | 扩展帧 ID。 |
+| 1808 | TX | DBC 周期 100 ms；运行时由 `/control/vcu_chassis_debug` callback 触发发送 | `dbc_protocol.cpp`, `control_command_bridge.cpp` | `encodeSignal`, `sendControlFrame` | `PID_Debug_Enable` | `2|1` | 1 | 0 | 无 | `/control/vcu_chassis_debug.pid_debug_enable` | 与 CAN ID 1813 在 ROS 消息 `VcuChassisDebug` 中整合。 |
+| 1813 | TX | DBC 周期 100 ms；运行时由 `/control/vcu_chassis_debug` callback 触发发送 | `dbc_protocol.cpp`, `control_command_bridge.cpp` | `encodeSignal`, `sendControlFrame` | `Velocity_Kp`, `Velocity_Ki`, `Velocity_Kd` | `34|10`, `44|10`, `54|10` | 0.1, 0.01, 0.01 | 0 | 无 | `/control/vcu_chassis_debug` gain 字段 | 与 CAN ID 1808 在 ROS 消息 `VcuChassisDebug` 中整合。 |
 | 289 | TX | DBC 周期 20 ms；运行时由 `/control/scu_control_command` callback 触发发送 | `dbc_protocol.cpp:82`, `control_command_bridge.cpp:16` | `encodeSignal`, `sendControlFrame` | `SCU_Shift_Level_Request`, `SCU_Drive_Mode_Request`, `SCU_Steering_Angle_Front`, `SCU_Steering_Angle_Rear`, `SCU_Target_Speed`, `SCU_Brake_Enable`, 灯光请求、模式和有效位 | `0|2`, `6|2`, `8|8`, `16|8`, `24|9`, `33|1`, `40|2`, `42|2`, `46|2`, `48|2`, `58|1`, `60|1`, `61|1` | 除目标速度 0.1 外均为 1 | 0 | 目标速度为 km/h | `/control/scu_control_command` 字段 | README 中有工程假设：虽然消息名为 SCU，ACU 允许发送；DBC 有 `BO_TX_BU_ 289 : ACU,SCU`。 |
 | 291 | TX | DBC 周期 20 ms；运行时由 `/control/scu_torque_command` callback 触发发送 | `dbc_protocol.cpp:69`, `control_command_bridge.cpp:57` | `encodeSignal`, `sendControlFrame` | 四个扭矩命令 | `0|16`, `16|16`, `32|16`, `48|16` | 0.1 | 0 | Nm | `/control/scu_torque_command` 字段 | DBC 有 `BO_TX_BU_ 291 : ACU,SCU`。 |
 | 294 | TX | DBC 周期 20 ms；运行时由 `/control/scu_chassis_command` callback 触发发送 | `dbc_protocol.cpp:75`, `control_command_bridge.cpp:41` | `encodeSignal`, `sendControlFrame` | 转向角速度和四路制动力 | `0|16`, `16|8`, `24|8`, `32|8`, `40|8` | 1 | 0 | deg/s, % | `/control/scu_chassis_command` 字段 | 转向角速度最小值 126、最大值 525；encoder 默认 clamp。DBC 有 `BO_TX_BU_ 294 : ACU,SCU`。 |
 
 DBC 中存在但 C++ 运行时未实现的条目：
 
-- CAN ID 1808 `VCU_Debug_Enable`。
-- CAN ID 1813 `VCU_Drive_Debug`。
+- 目前未发现。CAN ID 1808 和 1813 已通过一个 ROS 控制消息实现，该消息会发送两帧 CAN 报文。
 
 魔法数字 / 硬编码协议值：
 
@@ -387,7 +387,7 @@ colcon test --packages-select chassis_interfaces chassis_driver
 - 运行时源码中没有准确的 CAN 消息周期时间。
 - 因当前 shell 中没有 `colcon`，运行环境和 ROS2 发行版未被实际验证。
 - 没有硬件或仿真器用于验证 UDP packet framing 与真实设备的一致性。
-- 是否应实现所有 DBC 消息尚不明确；ID 1808 和 1813 存在于 `Yunle_CAN_release.dbc`，但运行时代码未实现。
+- `VCU_Chassis_Debug` 是 ROS 层整合逻辑名；实际 ROS `.msg` 类型名为 `VcuChassisDebug`。CAN 层仍使用 DBC 中的 `VCU_Debug_Enable` 和 `VCU_Drive_Debug` 两个报文名。
 - `message_channel_map` 已加载，但未用于验证或路由 RX frame；可能是为未来逻辑预留。
 - 分析时仓库中没有 `AGENTS.md`；建议后续添加。
 

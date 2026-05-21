@@ -126,16 +126,16 @@ bool handle_mode_flag_status
 - `README.md` 标注当前硬编码协议对齐 `Yunle_CAN_release.dbc`。
 - `docs/codex_project_analysis.md` 与 `docs/codex_project_analysis_zh.md` 已同步更新 DBC 文件名、CAN 映射表和周期属性说明。
 
-## 4. 未实现但仍存在于 DBC 的报文
+## 4. 此前未实现、本次已接入的 DBC 报文
 
 以下报文存在于 `Yunle_CAN_release.dbc`，但本次没有新增运行时 topic 或控制接口：
 
 | CAN ID | 消息名 | 说明 |
 |---:|---|---|
-| 1808 | `VCU_Debug_Enable` | 诊断/调试使能命令 |
-| 1813 | `VCU_Drive_Debug` | 纵向速度环调试参数 |
+| 1808 | `VCU_Debug_Enable` | 诊断/调试使能命令；已通过 ROS 消息 `VcuChassisDebug` 发送 |
+| 1813 | `VCU_Drive_Debug` | 纵向速度环调试参数；已通过 ROS 消息 `VcuChassisDebug` 发送 |
 
-原因：当前驱动原先也未实现这两个调试类报文。本次目标是让现有运行接口按新 DBC 对齐，不额外扩展新的调试 topic。
+当前驱动将这两个 DBC 报文整合为一个 ROS 控制 topic：`/yunle_chassis/control/vcu_chassis_debug`。该逻辑消息名为 `VCU_Chassis_Debug`，实际 ROS `.msg` 类型名为 `VcuChassisDebug`。收到一条 `VcuChassisDebug` 消息后，驱动会依次发送 CAN ID 1808 和 CAN ID 1813。
 
 ## 5. 构建与测试状态
 

@@ -71,10 +71,10 @@ All driver/network parameters are merged into one file:
 - `/yunle_chassis/control/scu_control_command`
 - `/yunle_chassis/control/scu_chassis_command`
 - `/yunle_chassis/control/scu_torque_command`
+- `/yunle_chassis/control/vcu_chassis_debug`
 
 ### Published feedback topics
 - `/yunle_chassis/feedback/bms_status`
-- `/yunle_chassis/feedback/bms_realtime_status`
 - `/yunle_chassis/feedback/vcu_warning_level`
 - `/yunle_chassis/feedback/wheel_speed`
 - `/yunle_chassis/feedback/ccu_status`
@@ -119,5 +119,12 @@ ros2 topic pub --once /yunle_chassis/control/scu_torque_command chassis_interfac
   torque_command_front_right: 100.0,
   torque_command_rear_left: 80.0,
   torque_command_rear_right: 80.0
+}"
+
+ros2 topic pub --once /yunle_chassis/control/vcu_chassis_debug chassis_interfaces/msg/VcuChassisDebug "{
+  pid_debug_enable: true,
+  velocity_kp: 10.0,
+  velocity_ki: 0.5,
+  velocity_kd: 0.2
 }"
 ```

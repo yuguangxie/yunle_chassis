@@ -4,7 +4,6 @@
 #include "chassis_driver/frame_router.hpp"
 #include "chassis_driver/udp_channel.hpp"
 
-#include "chassis_interfaces/msg/bms_realtime_status.hpp"
 #include "chassis_interfaces/msg/bms_status.hpp"
 #include "chassis_interfaces/msg/can_frame.hpp"
 #include "chassis_interfaces/msg/ccu_status.hpp"
@@ -13,6 +12,7 @@
 #include "chassis_interfaces/msg/scu_control_command.hpp"
 #include "chassis_interfaces/msg/scu_target_speed_feedback.hpp"
 #include "chassis_interfaces/msg/scu_torque_command.hpp"
+#include "chassis_interfaces/msg/vcu_chassis_debug.hpp"
 #include "chassis_interfaces/msg/vcu_warning_level.hpp"
 #include "chassis_interfaces/msg/wheel_speed_feedback.hpp"
 
@@ -137,7 +137,6 @@ private:
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr unknown_frame_pub_;
 
   rclcpp::Publisher<chassis_interfaces::msg::BmsStatus>::SharedPtr bms_status_pub_;
-  rclcpp::Publisher<chassis_interfaces::msg::BmsRealtimeStatus>::SharedPtr bms_realtime_pub_;
   rclcpp::Publisher<chassis_interfaces::msg::VcuWarningLevel>::SharedPtr vcu_warning_pub_;
   rclcpp::Publisher<chassis_interfaces::msg::WheelSpeedFeedback>::SharedPtr wheel_speed_pub_;
   rclcpp::Publisher<chassis_interfaces::msg::CcuStatus>::SharedPtr ccu_status_pub_;
@@ -150,6 +149,7 @@ private:
   rclcpp::Subscription<chassis_interfaces::msg::ScuControlCommand>::SharedPtr scu_control_sub_;
   rclcpp::Subscription<chassis_interfaces::msg::ScuChassisCommand>::SharedPtr scu_chassis_sub_;
   rclcpp::Subscription<chassis_interfaces::msg::ScuTorqueCommand>::SharedPtr scu_torque_sub_;
+  rclcpp::Subscription<chassis_interfaces::msg::VcuChassisDebug>::SharedPtr vcu_chassis_debug_sub_;
 
   friend class FrameRouter;
   friend class ControlCommandBridge;

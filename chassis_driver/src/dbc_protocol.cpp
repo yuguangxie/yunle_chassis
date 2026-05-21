@@ -90,11 +90,13 @@ const std::unordered_map<uint32_t, MessageDefinition> kMessageById = {
       {"Steering_Angle_Speed_Valid", 60, 1, ByteOrder::Intel, ValueType::Unsigned, 1.0, 0.0, 0.0, 1.0, ""},
       {"Brake_Force_Command_Valid", 61, 1, ByteOrder::Intel, ValueType::Unsigned, 1.0, 0.0, 0.0, 1.0, ""},
     }}},
-  {2542813185U, {"BMS_Realtime_Status", 2542813185U, true, 8U, "BMS", {
-      {"BMS_Total_Battery_Voltage", 0, 16, ByteOrder::Intel, ValueType::Unsigned, 0.1, 0.0, 0.0, 6553.5, "V"},
-      {"BMS_Pack_Voltage", 16, 16, ByteOrder::Intel, ValueType::Unsigned, 0.1, 0.0, 0.0, 6553.5, "V"},
-      {"BMS_Pack_Current", 32, 16, ByteOrder::Intel, ValueType::Unsigned, 0.1, -3000.0, -3000.0, 3553.5, "A"},
-      {"BMS_Realtime_SOC", 48, 16, ByteOrder::Intel, ValueType::Unsigned, 0.1, 0.0, 0.0, 100.0, "%"},
+  {1808U, {"VCU_Debug_Enable", 1808U, false, 8U, "VCU", {
+      {"PID_Debug_Enable", 2, 1, ByteOrder::Intel, ValueType::Unsigned, 1.0, 0.0, 0.0, 1.0, ""},
+    }}},
+  {1813U, {"VCU_Drive_Debug", 1813U, false, 8U, "VCU", {
+      {"Velocity_Kp", 34, 10, ByteOrder::Intel, ValueType::Unsigned, 0.1, 0.0, 0.0, 102.3, ""},
+      {"Velocity_Ki", 44, 10, ByteOrder::Intel, ValueType::Unsigned, 0.01, 0.0, 0.0, 10.23, ""},
+      {"Velocity_Kd", 54, 10, ByteOrder::Intel, ValueType::Unsigned, 0.01, 0.0, 0.0, 10.23, ""},
     }}},
 };
 

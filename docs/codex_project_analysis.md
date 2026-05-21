@@ -92,7 +92,7 @@ Declared in `ChassisDriverNode::loadParameters()` in `chassis_driver/src/chassis
 | `enabled_publish_topics` | `["all"]` | Fine-grained publisher enable list. |
 | `enabled_subscribe_topics` | `["all"]` | Fine-grained subscriber enable list. |
 | `message_channel_map` | all listed feedback on `can2` | Maps decoded feedback message names to CAN channel. Currently loaded but not used to filter RX frames. |
-| `control_message_channel_map` | all listed control messages on `can2` | Maps outgoing control message names to CAN channel; required for three control messages. |
+| `control_message_channel_map` | all listed control/debug messages on `can2` | Maps outgoing control/debug CAN message names to CAN channel; required for SCU commands plus `VCU_Debug_Enable` and `VCU_Drive_Debug`. |
 | `local_ip` | `192.168.1.102` | Local bind IP for UDP sockets. |
 | `can1_local_port` | `8234` | Local UDP port for CAN1. |
 | `can2_local_port` | `8235` | Local UDP port for CAN2. |
@@ -115,7 +115,6 @@ All topic names below assume default `topic_prefix=/yunle_chassis`.
 | `/yunle_chassis/debug/status` | `std_msgs/msg/String` | Publisher exists, but no publish call found | Not used in current source | Created in constructor |
 | `/yunle_chassis/debug/unknown_frames` | `std_msgs/msg/String` | Unknown CAN ID in `publishDecoded()` default case | Any received frame not handled by the switch | `ChassisDriverNode::publishUnknownFrame()` |
 | `/yunle_chassis/feedback/bms_status` | `chassis_interfaces/msg/BmsStatus` | On received CAN ID 256 | `BMS_Status` | `ChassisDriverNode::publishDecoded()` |
-| `/yunle_chassis/feedback/bms_realtime_status` | `chassis_interfaces/msg/BmsRealtimeStatus` | On received CAN ID 2542813185 | `BMS_Realtime_Status`, extended ID | `ChassisDriverNode::publishDecoded()` |
 | `/yunle_chassis/feedback/vcu_warning_level` | `chassis_interfaces/msg/VcuWarningLevel` | On received CAN ID 119 | `VCU_Warning_Level` | `ChassisDriverNode::publishDecoded()` |
 | `/yunle_chassis/feedback/wheel_speed` | `chassis_interfaces/msg/WheelSpeedFeedback` | On received CAN ID 360 | `VCU_Wheel_Speed_Feedback` | `ChassisDriverNode::publishDecoded()` |
 | `/yunle_chassis/feedback/ccu_status` | `chassis_interfaces/msg/CcuStatus` | On received CAN ID 81 | `VCU_CCU_Status` | `ChassisDriverNode::publishDecoded()` |
@@ -131,6 +130,7 @@ Publish frequency is not timer-based in this code. It is exactly event-driven by
 | `/yunle_chassis/control/scu_control_command` | `chassis_interfaces/msg/ScuControlCommand` | Lambda in `ControlCommandBridge::ControlCommandBridge()` at `control_command_bridge.cpp:16` | Shift, drive mode, steering front/rear, target speed, brake enable, light requests, mode/valid flags | CAN ID 289 `SCU_Control_Command` via `sendControlFrame()` |
 | `/yunle_chassis/control/scu_chassis_command` | `chassis_interfaces/msg/ScuChassisCommand` | Lambda in `ControlCommandBridge::ControlCommandBridge()` at `control_command_bridge.cpp:41` | Steering angle speed and four brake-force commands | CAN ID 294 `SCU_Chassis_Command` via `sendControlFrame()` |
 | `/yunle_chassis/control/scu_torque_command` | `chassis_interfaces/msg/ScuTorqueCommand` | Lambda in `ControlCommandBridge::ControlCommandBridge()` at `control_command_bridge.cpp:57` | Four wheel torque commands | CAN ID 291 `SCU_Torque_Command` via `sendControlFrame()` |
+| `/yunle_chassis/control/vcu_chassis_debug` | `chassis_interfaces/msg/VcuChassisDebug` | Lambda in `ControlCommandBridge::ControlCommandBridge()` | Integrated chassis debug command, logical name `VCU_Chassis_Debug` | CAN IDs 1808 `VCU_Debug_Enable` and 1813 `VCU_Drive_Debug` via `sendControlFrame()` |
 
 ### Services and Actions
 
@@ -195,15 +195,15 @@ All rows below are explicit in source unless marked otherwise. Signal definition
 | 256 | RX | DBC cycle 100 ms; runtime event-driven by UDP receive | `dbc_protocol.cpp:13`, `chassis_driver_node.cpp:252` | `decodeSignal`, `publishDecoded` | `BMS_Voltage`, `BMS_Current`, `BMS_SOC` | `0|16`, `16|16`, `32|16` | 0.1, 0.1, 1 | 0 | V, A, % | `/feedback/bms_status` | New DBC range: voltage 0-100 V, current -500-500 A. |
 | 360 | RX | DBC cycle 20 ms; runtime event-driven by UDP receive | `dbc_protocol.cpp:29`, `chassis_driver_node.cpp:286` | `decodeSignal`, `publishDecoded` | four wheel RPM fields | `0|16`, `16|16`, `32|16`, `48|16` | 0.1 | 0 | rpm | `/feedback/wheel_speed` | Signed 16-bit values. |
 | 2033 | RX | DBC cycle 20 ms; runtime event-driven by UDP receive | `dbc_protocol.cpp:59`, `chassis_driver_node.cpp:328` | `decodeSignal`, `publishDecoded` | `Hardware_Target_Speed`, `SCU_Target_Speed_Feedback`, `Vehicle_Target_Speed`, `Vehicle_Target_Speed_RPM` | `0|16`, `16|16`, `32|16`, `48|16` | 0.1 | 0 | km/h, rpm | `/feedback/target_speed_feedback` | Signed 16-bit values. |
-| 2542813185 | RX | Event-driven by UDP receive | `dbc_protocol.cpp:94`, `chassis_driver_node.cpp:261` | `decodeSignal`, `publishDecoded` | `BMS_Total_Battery_Voltage`, `BMS_Pack_Voltage`, `BMS_Pack_Current`, `BMS_Realtime_SOC` | `0|16`, `16|16`, `32|16`, `48|16` | 0.1 | 0, 0, -3000, 0 | V, V, A, % | `/feedback/bms_realtime_status` | Extended CAN ID. |
+| 1808 | TX | DBC cycle 100 ms; runtime sends on `/control/vcu_chassis_debug` callback | `dbc_protocol.cpp`, `control_command_bridge.cpp` | `encodeSignal`, `sendControlFrame` | `PID_Debug_Enable` | `2|1` | 1 | 0 | none | `/control/vcu_chassis_debug.pid_debug_enable` | Integrated with CAN ID 1813 under ROS message `VcuChassisDebug`. |
+| 1813 | TX | DBC cycle 100 ms; runtime sends on `/control/vcu_chassis_debug` callback | `dbc_protocol.cpp`, `control_command_bridge.cpp` | `encodeSignal`, `sendControlFrame` | `Velocity_Kp`, `Velocity_Ki`, `Velocity_Kd` | `34|10`, `44|10`, `54|10` | 0.1, 0.01, 0.01 | 0 | none | `/control/vcu_chassis_debug` gain fields | Integrated with CAN ID 1808 under ROS message `VcuChassisDebug`. |
 | 289 | TX | DBC cycle 20 ms; runtime sends on `/control/scu_control_command` callback | `dbc_protocol.cpp:82`, `control_command_bridge.cpp:16` | `encodeSignal`, `sendControlFrame` | `SCU_Shift_Level_Request`, `SCU_Drive_Mode_Request`, `SCU_Steering_Angle_Front`, `SCU_Steering_Angle_Rear`, `SCU_Target_Speed`, `SCU_Brake_Enable`, light requests, mode and valid flags | `0|2`, `6|2`, `8|8`, `16|8`, `24|9`, `33|1`, `40|2`, `42|2`, `46|2`, `48|2`, `58|1`, `60|1`, `61|1` | 1 except target speed 0.1 | 0 | km/h for target speed | `/control/scu_control_command` fields | README says engineering assumption: ACU is allowed to transmit this SCU-named message; DBC has `BO_TX_BU_ 289 : ACU,SCU`. |
 | 291 | TX | DBC cycle 20 ms; runtime sends on `/control/scu_torque_command` callback | `dbc_protocol.cpp:69`, `control_command_bridge.cpp:57` | `encodeSignal`, `sendControlFrame` | four torque commands | `0|16`, `16|16`, `32|16`, `48|16` | 0.1 | 0 | Nm | `/control/scu_torque_command` fields | DBC has `BO_TX_BU_ 291 : ACU,SCU`. |
 | 294 | TX | DBC cycle 20 ms; runtime sends on `/control/scu_chassis_command` callback | `dbc_protocol.cpp:75`, `control_command_bridge.cpp:41` | `encodeSignal`, `sendControlFrame` | steering angle speed and four brake forces | `0|16`, `16|8`, `24|8`, `32|8`, `40|8` | 1 | 0 | deg/s, % | `/control/scu_chassis_command` fields | Steering speed min is 126, max 525; encoder clamps by default. DBC has `BO_TX_BU_ 294 : ACU,SCU`. |
 
 DBC entries present but not implemented in C++ runtime:
 
-- CAN ID 1808 `VCU_Debug_Enable`.
-- CAN ID 1813 `VCU_Drive_Debug`.
+- None known after the `VcuChassisDebug` integration. CAN IDs 1808 and 1813 are implemented as one ROS control message that emits two CAN frames.
 
 Magic numbers / hardcoded protocol values:
 
@@ -387,7 +387,7 @@ Add tests:
 - Exact CAN message cycle times are not present in runtime source.
 - Runtime environment and ROS2 distro were not verified because `colcon` is unavailable in this shell.
 - No hardware or simulator was available to validate UDP packet framing against a real device.
-- Whether all DBC messages should be implemented is unclear; IDs 1808 and 1813 are in `Yunle_CAN_release.dbc` but absent from runtime code.
+- `VCU_Chassis_Debug` is a ROS-level logical integration name; the actual ROS `.msg` type is `VcuChassisDebug`. CAN-level messages still use the DBC names `VCU_Debug_Enable` and `VCU_Drive_Debug`.
 - `message_channel_map` is loaded but not used to validate or route RX frames; it may be reserved for future logic.
 - No AGENTS.md existed during this analysis; adding one is recommended for future agents.
 

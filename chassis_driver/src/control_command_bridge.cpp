@@ -67,6 +67,26 @@ ControlCommandBridge::ControlCommandBridge(ChassisDriverNode & node)
         node_.sendControlFrame(frame, "SCU_Torque_Command");
       });
   }
+
+  if (node_.isSubscribeTopicEnabled("control_vcu_chassis_debug")) {
+    node_.vcu_chassis_debug_sub_ = node_.create_subscription<chassis_interfaces::msg::VcuChassisDebug>(
+      node_.makeTopicName("control/vcu_chassis_debug"), qos,
+      [this](const chassis_interfaces::msg::VcuChassisDebug::SharedPtr msg) {
+      CanFrame enable_frame;
+      enable_frame.can_id = 1808U;
+      enable_frame.dlc = 8;
+      DbcProtocol::encodeSignal(enable_frame, "PID_Debug_Enable", msg->pid_debug_enable ? 1.0 : 0.0);
+      node_.sendControlFrame(enable_frame, "VCU_Debug_Enable");
+
+      CanFrame debug_frame;
+      debug_frame.can_id = 1813U;
+      debug_frame.dlc = 8;
+      DbcProtocol::encodeSignal(debug_frame, "Velocity_Kp", msg->velocity_kp);
+      DbcProtocol::encodeSignal(debug_frame, "Velocity_Ki", msg->velocity_ki);
+      DbcProtocol::encodeSignal(debug_frame, "Velocity_Kd", msg->velocity_kd);
+      node_.sendControlFrame(debug_frame, "VCU_Drive_Debug");
+      });
+  }
 }
 
 }  // namespace chassis_driver
