@@ -99,7 +99,7 @@
 新的 ROS 消息字段为：
 
 ```text
-builtin_interfaces/Time stamp
+time stamp
 uint8 bms_soc_warning
 uint8 mcu_disconnect_warning
 uint8 mcu_motor_warning
@@ -139,7 +139,7 @@ bool handle_mode_flag_status
 
 ## 5. 构建与测试状态
 
-当前运行环境没有 ROS2 和 colcon 系统环境，因此无法完成真实 ROS2 构建验证。
+当前运行环境没有 ROS1 和 catkin 系统环境，因此无法完成真实 ROS1 构建验证。
 
 已知可执行检查：
 
@@ -147,12 +147,11 @@ bool handle_mode_flag_status
 - 源码字段残留扫描
 - DBC 与硬编码字段的人工对照
 
-建议在 ROS2 Humble/Linux 或项目指定 ROS2 环境中继续执行：
+建议在 ROS1 Noetic/Linux 或项目指定 ROS1 环境中继续执行：
 
 ```bash
 source /opt/ros/humble/setup.bash
-colcon build --symlink-install --packages-select chassis_interfaces chassis_driver
-colcon test --packages-select chassis_interfaces chassis_driver
+catkin_make
 ```
 
 ## 6. 后续注意事项

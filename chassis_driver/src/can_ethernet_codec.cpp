@@ -4,6 +4,7 @@ namespace chassis_driver
 {
 
 /** Decode fixed-size CAN-over-Ethernet records from payload bytes. */
+/** 从 payload 字节中解码固定长度的以太网转 CAN 记录。 */
 std::vector<CanFrame> CanEthernetCodec::decodePayload(const std::vector<uint8_t> & payload, uint8_t channel,
   bool & had_trailing_bytes, size_t & trailing_bytes_count)
 {
@@ -42,6 +43,7 @@ std::vector<CanFrame> CanEthernetCodec::decodePayload(const std::vector<uint8_t>
 }
 
 /** Encode CAN frame into one 13-byte transport record. */
+/** 将 CAN 帧编码为一条 13 字节传输记录。 */
 std::array<uint8_t, 13> CanEthernetCodec::encodeFrame(const CanFrame & frame)
 {
   std::array<uint8_t, 13> out{};

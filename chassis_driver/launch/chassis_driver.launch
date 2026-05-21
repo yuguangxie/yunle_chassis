@@ -1,0 +1,7 @@
+<launch>
+  <!-- Start chassis_driver_node and load unified ROS1 private parameters. -->
+  <!-- 启动 chassis_driver_node，并加载统一的 ROS1 私有参数。 -->
+  <node pkg="chassis_driver" type="chassis_driver_node" name="chassis_driver_node" output="screen">
+    <rosparam command="load" file="$(find chassis_driver)/config/chassis_driver.yaml" />
+  </node>
+</launch>

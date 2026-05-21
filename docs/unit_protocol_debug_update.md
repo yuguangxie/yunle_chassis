@@ -9,7 +9,7 @@
 | 1808 | `VCU_Debug_Enable` | TX | 100 ms | `PID_Debug_Enable` |
 | 1813 | `VCU_Drive_Debug` | TX | 100 ms | `Velocity_Kp`, `Velocity_Ki`, `Velocity_Kd` |
 
-按本次需求，这两条底盘发送指令在代码的 ROS2 接口层整合为一个逻辑消息 `VCU_Chassis_Debug`。由于 ROS2 `.msg` 文件通常使用 CamelCase 命名，实际接口文件名为 `VcuChassisDebug.msg`，对应 topic 为 `/yunle_chassis/control/vcu_chassis_debug`。
+按本次需求，这两条底盘发送指令在代码的 ROS 接口层整合为一个逻辑消息 `VCU_Chassis_Debug`。实际接口文件名为 `VcuChassisDebug.msg`，对应 topic 为 `/yunle_chassis/control/vcu_chassis_debug`。
 
 ## 2. 接口变更
 
@@ -70,6 +70,6 @@ float32 velocity_kd
 
 ## 5. 注意事项
 
-- `VCU_Chassis_Debug` 是 ROS2 层的整合逻辑名；实际 `.msg` 类型名为 `VcuChassisDebug`。CAN 层仍按 DBC 中的 `VCU_Debug_Enable` 和 `VCU_Drive_Debug` 两个报文发送。
+- `VCU_Chassis_Debug` 是 ROS 层的整合逻辑名；实际 `.msg` 类型名为 `VcuChassisDebug`。CAN 层仍按 DBC 中的 `VCU_Debug_Enable` 和 `VCU_Drive_Debug` 两个报文发送。
 - 当前发送仍由 topic callback 触发，不会自动按 DBC 的 100 ms 周期重复发送。
-- 当前环境没有 ROS2/colcon，因此需要在 ROS2 环境中补跑 `colcon build --symlink-install` 和相关测试。
+- 当前环境没有 ROS1/catkin，因此需要在 ROS1 环境中补跑 `catkin_make` 和相关测试。

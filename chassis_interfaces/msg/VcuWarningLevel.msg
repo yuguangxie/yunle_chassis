@@ -1,4 +1,4 @@
-builtin_interfaces/Time stamp
+time stamp
 uint8 bms_soc_warning
 uint8 mcu_disconnect_warning
 uint8 mcu_motor_warning

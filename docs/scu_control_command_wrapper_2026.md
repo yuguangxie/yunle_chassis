@@ -2,8 +2,8 @@
 
 生成日期：2026-05-21
 依据文档：`docs/云乐线控底盘通信协议使用说明-2026.docx` 中“3 自动驾驶控制报文（0x121）”章节。
-涉及 ROS2 topic：`/yunle_chassis/control/scu_control_command`
-涉及 ROS2 msg：`chassis_interfaces/msg/ScuControlCommand.msg`
+涉及 ROS1 topic：`/yunle_chassis/control/scu_control_command`
+涉及 ROS1 msg：`chassis_interfaces/msg/ScuControlCommand.msg`
 涉及 CAN 报文：`SCU_Control_Command`，CAN ID `0x121` / 十进制 `289`。
 
 ## 1. 本次封装后的 ROS 侧语义

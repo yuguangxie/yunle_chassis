@@ -29,19 +29,18 @@ double steeringAngleDegToCanRaw(double angle_deg, double max_angle_deg)
 }  // namespace
 
 /** Subscribe control topics and convert each message into DBC-encoded CAN frame. */
+/** 订阅控制话题，并将每条消息转换为 DBC 编码后的 CAN 帧。 */
 ControlCommandBridge::ControlCommandBridge(ChassisDriverNode & node)
 : node_(node)
 {
-  auto qos = rclcpp::QoS(rclcpp::KeepLast(node_.default_qos_depth_));
-
   if (node_.isSubscribeTopicEnabled("control_scu_control_command")) {
-    node_.scu_control_sub_ = node_.create_subscription<chassis_interfaces::msg::ScuControlCommand>(
-      node_.makeTopicName("control/scu_control_command"), qos,
-      [this](const chassis_interfaces::msg::ScuControlCommand::SharedPtr msg) {
+    node_.scu_control_sub_ = node_.nh_.subscribe<chassis_interfaces::ScuControlCommand>(
+      node_.makeTopicName("control/scu_control_command"), node_.default_qos_depth_,
+      [this](const chassis_interfaces::ScuControlCommand::ConstPtr & msg) {
       // Engineering assumption: although message is named SCU_*, ACU is allowed to send it.
+      // 工程假设：虽然报文命名为 SCU_*，但 ACU 被允许发送该报文。
       if (!isValidShiftRequest(msg->scu_shift_level_request)) {
-        RCLCPP_WARN(
-          node_.get_logger(),
+        ROS_WARN(
           "Drop SCU_Control_Command: scu_shift_level_request=%u is invalid, expected 1(D), 2(N), or 3(R)",
           static_cast<unsigned>(msg->scu_shift_level_request));
         return;
@@ -49,8 +48,7 @@ ControlCommandBridge::ControlCommandBridge(ChassisDriverNode & node)
 
       double speed_kmh = static_cast<double>(msg->scu_target_speed);
       if (!std::isfinite(speed_kmh) || speed_kmh < 0.0 || speed_kmh > node_.scu_control_max_target_speed_kmh_) {
-        RCLCPP_WARN(
-          node_.get_logger(),
+        ROS_WARN(
           "SCU_Control_Command target speed %.3f km/h is outside [0, %.3f], send 0",
           static_cast<double>(msg->scu_target_speed), node_.scu_control_max_target_speed_kmh_);
         speed_kmh = 0.0;
@@ -58,16 +56,16 @@ ControlCommandBridge::ControlCommandBridge(ChassisDriverNode & node)
 
       double front_angle = static_cast<double>(msg->scu_steering_angle_front);
       if (!std::isfinite(front_angle) || std::abs(front_angle) > node_.scu_control_max_steering_angle_deg_) {
-        RCLCPP_WARN(
-          node_.get_logger(), "SCU_Control_Command front steering angle %.3f deg is outside [-%.3f, %.3f], send 0",
+        ROS_WARN(
+          "SCU_Control_Command front steering angle %.3f deg is outside [-%.3f, %.3f], send 0",
           front_angle, node_.scu_control_max_steering_angle_deg_, node_.scu_control_max_steering_angle_deg_);
         front_angle = 0.0;
       }
 
       double rear_angle = static_cast<double>(msg->scu_steering_angle_rear);
       if (!std::isfinite(rear_angle) || std::abs(rear_angle) > node_.scu_control_max_steering_angle_deg_) {
-        RCLCPP_WARN(
-          node_.get_logger(), "SCU_Control_Command rear steering angle %.3f deg is outside [-%.3f, %.3f], send 0",
+        ROS_WARN(
+          "SCU_Control_Command rear steering angle %.3f deg is outside [-%.3f, %.3f], send 0",
           rear_angle, node_.scu_control_max_steering_angle_deg_, node_.scu_control_max_steering_angle_deg_);
         rear_angle = 0.0;
       }
@@ -98,9 +96,9 @@ ControlCommandBridge::ControlCommandBridge(ChassisDriverNode & node)
   }
 
   if (node_.isSubscribeTopicEnabled("control_scu_chassis_command")) {
-    node_.scu_chassis_sub_ = node_.create_subscription<chassis_interfaces::msg::ScuChassisCommand>(
-      node_.makeTopicName("control/scu_chassis_command"), qos,
-      [this](const chassis_interfaces::msg::ScuChassisCommand::SharedPtr msg) {
+    node_.scu_chassis_sub_ = node_.nh_.subscribe<chassis_interfaces::ScuChassisCommand>(
+      node_.makeTopicName("control/scu_chassis_command"), node_.default_qos_depth_,
+      [this](const chassis_interfaces::ScuChassisCommand::ConstPtr & msg) {
       CanFrame frame;
       frame.can_id = 294U;
       frame.dlc = 8;
@@ -114,9 +112,9 @@ ControlCommandBridge::ControlCommandBridge(ChassisDriverNode & node)
   }
 
   if (node_.isSubscribeTopicEnabled("control_scu_torque_command")) {
-    node_.scu_torque_sub_ = node_.create_subscription<chassis_interfaces::msg::ScuTorqueCommand>(
-      node_.makeTopicName("control/scu_torque_command"), qos,
-      [this](const chassis_interfaces::msg::ScuTorqueCommand::SharedPtr msg) {
+    node_.scu_torque_sub_ = node_.nh_.subscribe<chassis_interfaces::ScuTorqueCommand>(
+      node_.makeTopicName("control/scu_torque_command"), node_.default_qos_depth_,
+      [this](const chassis_interfaces::ScuTorqueCommand::ConstPtr & msg) {
       CanFrame frame;
       frame.can_id = 291U;
       frame.dlc = 8;
@@ -129,9 +127,9 @@ ControlCommandBridge::ControlCommandBridge(ChassisDriverNode & node)
   }
 
   if (node_.isSubscribeTopicEnabled("control_vcu_chassis_debug")) {
-    node_.vcu_chassis_debug_sub_ = node_.create_subscription<chassis_interfaces::msg::VcuChassisDebug>(
-      node_.makeTopicName("control/vcu_chassis_debug"), qos,
-      [this](const chassis_interfaces::msg::VcuChassisDebug::SharedPtr msg) {
+    node_.vcu_chassis_debug_sub_ = node_.nh_.subscribe<chassis_interfaces::VcuChassisDebug>(
+      node_.makeTopicName("control/vcu_chassis_debug"), node_.default_qos_depth_,
+      [this](const chassis_interfaces::VcuChassisDebug::ConstPtr & msg) {
       CanFrame enable_frame;
       enable_frame.can_id = 1808U;
       enable_frame.dlc = 8;

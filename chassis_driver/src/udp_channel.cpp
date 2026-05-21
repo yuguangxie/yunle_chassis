@@ -11,12 +11,14 @@ namespace chassis_driver
 {
 
 /** Close channel on destruction. */
+/** 析构时关闭通道。 */
 UdpChannel::~UdpChannel()
 {
   close();
 }
 
 /** Open UDP socket, bind local endpoint and configure remote peer. */
+/** 打开 UDP socket，绑定本地端点并配置远端 peer。 */
 bool UdpChannel::open(const std::string & local_ip, uint16_t local_port, const std::string & remote_ip,
   uint16_t remote_port, int socket_timeout_ms, int recv_buffer_size)
 {
@@ -63,6 +65,7 @@ bool UdpChannel::open(const std::string & local_ip, uint16_t local_port, const s
 }
 
 /** Receive one UDP packet into output payload. */
+/** 接收一个 UDP 包到输出 payload。 */
 bool UdpChannel::receive(std::vector<uint8_t> & out_payload)
 {
   if (!opened_) {
@@ -80,6 +83,7 @@ bool UdpChannel::receive(std::vector<uint8_t> & out_payload)
 }
 
 /** Send one UDP packet to configured remote endpoint. */
+/** 向已配置的远端端点发送一个 UDP 包。 */
 bool UdpChannel::send(const std::vector<uint8_t> & payload)
 {
   if (!opened_ || !remote_addr_valid_) {
@@ -91,6 +95,7 @@ bool UdpChannel::send(const std::vector<uint8_t> & payload)
 }
 
 /** Close socket and clear channel state. */
+/** 关闭 socket 并清空通道状态。 */
 void UdpChannel::close()
 {
   if (fd_ >= 0) {
