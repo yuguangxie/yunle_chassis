@@ -1,25 +1,36 @@
 chassis_driver_node:
   ros__parameters:
     # ==================== Topic configuration ====================
+    # ==================== 话题配置 ====================
     # Topic namespace prefix. All publish/subscribe topics become:
     #   <topic_prefix>/<relative_topic>
     # Example: /yunle_chassis/feedback/bms_status
+    # 话题命名空间前缀。所有发布/订阅话题都会变为：
+    #   <topic_prefix>/<relative_topic>
+    # 示例：/yunle_chassis/feedback/bms_status
     topic_prefix: /yunle_chassis
 
     # Toggle raw and debug outputs.
+    # 原始 CAN 和调试输出开关。
     publish_raw_can: true
     publish_unknown_frames: true
     enable_debug_topics: true
     # Log each successfully transmitted control CAN frame as hexadecimal text.
+    # 将每一帧成功发送到底盘的控制 CAN 报文以十六进制文本输出到日志。
     log_control_can_frames: false
 
     # Default QoS queue depth used for publishers/subscribers.
+    # 发布器和订阅器使用的默认 QoS 队列深度。
     default_qos_depth: 10
 
     # Fine-grained topic switch for publishers.
     # Use ["all"] to enable all publish topics;
     # otherwise list only the keys you need.
     # Available publish keys:
+    # 发布话题的细粒度开关。
+    # 使用 ["all"] 启用全部发布话题；
+    # 否则只列出需要启用的 key。
+    # 可用发布 key：
     #   can_rx_raw
     #   can_tx_raw
     #   debug_unknown_frames
@@ -36,6 +47,10 @@ chassis_driver_node:
     # Use ["all"] to enable all subscribe topics;
     # otherwise list only the keys you need.
     # Available subscribe keys:
+    # 订阅话题的细粒度开关。
+    # 使用 ["all"] 启用全部订阅话题；
+    # 否则只列出需要启用的 key。
+    # 可用订阅 key：
     #   control_scu_control_command
     #   control_scu_chassis_command
     #   control_scu_torque_command
@@ -44,7 +59,9 @@ chassis_driver_node:
       - all
 
     # ==================== CAN message channel routing ====================
+    # ==================== CAN 报文通道路由 ====================
     # Route decoded feedback messages to can1/can2 source channel.
+    # 将已解析的反馈报文映射到 can1/can2 来源通道。
     message_channel_map:
       - "BMS_Status:can2"
       - "VCU_Warning_Level:can2"
@@ -54,6 +71,7 @@ chassis_driver_node:
       - "SCU_Target_Speed_Feedback:can2"
 
     # Route outgoing control messages to can1/can2 target channel.
+    # 将待发送的控制报文映射到 can1/can2 目标通道。
     control_message_channel_map:
       - "SCU_Control_Command:can2"
       - "SCU_Chassis_Command:can2"
@@ -62,29 +80,41 @@ chassis_driver_node:
       - "VCU_Drive_Debug:can2"
 
     # ==================== UDP/CAN network parameters ====================
+    # ==================== UDP/CAN 网络参数 ====================
     # Local bind IP for both CAN sockets.
+    # CAN1/CAN2 两个 socket 使用的本地绑定 IP。
     local_ip: 192.168.1.102
     # Local UDP bind ports for CAN1 and CAN2.
+    # CAN1 和 CAN2 的本地 UDP 绑定端口。
     can1_local_port: 8234
     can2_local_port: 8235
 
     # Remote CAN gateway IP for each channel.
+    # 每个通道对应的远端 CAN 网关 IP。
     can1_remote_ip: 192.168.1.98
     can2_remote_ip: 192.168.1.99
     # Remote UDP destination port.
+    # 远端 UDP 目标端口。
     remote_port: 1234
 
     # UDP receive buffer size (bytes).
+    # UDP 接收缓冲区大小，单位字节。
     udp_buffer_size: 2048
     # Socket receive timeout in milliseconds.
+    # Socket 接收超时时间，单位毫秒。
     socket_timeout_ms: 200
 
     # ==================== SCU control command wrapper ====================
+    # ==================== SCU 控制报文封装参数 ====================
     # Maximum physical wheel steering angle used to convert
     # /control/scu_control_command steering angles in degrees to 0x121 raw.
     # The 2026 protocol gives examples: JD 24 deg, WD 27 deg, TD 25 deg.
+    # 用于将 /control/scu_control_command 中角度制前/后轮转角转换为 0x121 原始值的最大物理车轮转角。
+    # 2026 协议文档给出的示例为：JD 24 度、WD 27 度、TD 25 度。
     scu_control_max_steering_angle_deg: 27.0
 
     # Maximum accepted positive speed magnitude for SCU_Target_Speed.
     # Values outside [0, max] are logged and sent as 0.
+    # SCU_Target_Speed 接受的最大正速度幅值。
+    # 超出 [0, max] 的值会记录警告并按 0 下发。
     scu_control_max_target_speed_kmh: 15.0

@@ -3,6 +3,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 /** ROS2 process entrypoint: initialize, spin chassis node, shutdown. */
+/** ROS2 进程入口：初始化、运行底盘节点并关闭。 */
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);

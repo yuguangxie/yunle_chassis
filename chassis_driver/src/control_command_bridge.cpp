@@ -29,6 +29,7 @@ double steeringAngleDegToCanRaw(double angle_deg, double max_angle_deg)
 }  // namespace
 
 /** Subscribe control topics and convert each message into DBC-encoded CAN frame. */
+/** 订阅控制话题，并将每条消息转换为按 DBC 编码的 CAN 帧。 */
 ControlCommandBridge::ControlCommandBridge(ChassisDriverNode & node)
 : node_(node)
 {
@@ -39,6 +40,7 @@ ControlCommandBridge::ControlCommandBridge(ChassisDriverNode & node)
       node_.makeTopicName("control/scu_control_command"), qos,
       [this](const chassis_interfaces::msg::ScuControlCommand::SharedPtr msg) {
       // Engineering assumption: although message is named SCU_*, ACU is allowed to send it.
+      // 工程假设：虽然报文名为 SCU_*，但按当前需求 ACU 被允许发送该报文。
       if (!isValidShiftRequest(msg->scu_shift_level_request)) {
         RCLCPP_WARN(
           node_.get_logger(),

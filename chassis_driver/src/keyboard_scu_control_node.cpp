@@ -24,6 +24,8 @@ void signalHandler(int)
   g_shutdown_requested.store(true);
 }
 
+/** Manage terminal raw mode so key presses can be read without pressing Enter. */
+/** 管理终端 raw 模式，使按键无需回车即可被读取。 */
 class TerminalRawMode
 {
 public:
@@ -64,6 +66,8 @@ private:
   bool enabled_{false};
 };
 
+/** Publish ScuControlCommand messages from keyboard input for manual chassis checkout. */
+/** 根据键盘输入发布 ScuControlCommand 消息，用于人工底盘联调检查。 */
 class KeyboardScuControlNode : public rclcpp::Node
 {
 public:

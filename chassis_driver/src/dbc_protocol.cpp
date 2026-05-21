@@ -101,6 +101,7 @@ const std::unordered_map<uint32_t, MessageDefinition> kMessageById = {
 };
 
 /** Build name-indexed map from ID-indexed message definitions. */
+/** 基于按 ID 索引的报文定义构建按名称索引的映射。 */
 std::unordered_map<std::string, MessageDefinition> createByName()
 {
   std::unordered_map<std::string, MessageDefinition> by_name;
@@ -115,11 +116,14 @@ const std::unordered_map<std::string, MessageDefinition> kMessageByName = create
 }  // namespace
 
 /** Return ID-indexed static message dictionary. */
+/** 返回按 ID 索引的静态报文字典。 */
 const std::unordered_map<uint32_t, MessageDefinition> & DbcProtocol::messageById() { return kMessageById; }
 /** Return name-indexed static message dictionary. */
+/** 返回按名称索引的静态报文字典。 */
 const std::unordered_map<std::string, MessageDefinition> & DbcProtocol::messageByName() { return kMessageByName; }
 
 /** Decode one physical signal value from frame payload. */
+/** 从帧载荷中解析一个物理信号值。 */
 std::optional<double> DbcProtocol::decodeSignal(const CanFrame & frame, const std::string & signal_name)
 {
   const auto msg_it = kMessageById.find(frame.can_id);
@@ -138,6 +142,7 @@ std::optional<double> DbcProtocol::decodeSignal(const CanFrame & frame, const st
 }
 
 /** Encode one physical signal value into frame payload. */
+/** 将一个物理信号值编码到帧载荷中。 */
 bool DbcProtocol::encodeSignal(CanFrame & frame, const std::string & signal_name, double physical_value, bool clamp)
 {
   const auto msg_it = kMessageById.find(frame.can_id);
@@ -178,6 +183,7 @@ bool DbcProtocol::encodeSignal(CanFrame & frame, const std::string & signal_name
 }
 
 /** Extract little-endian bit field from 8-byte CAN payload. */
+/** 从 8 字节 CAN 载荷中提取小端位域。 */
 uint64_t DbcProtocol::extractIntel(const std::array<uint8_t, 8> & data, uint16_t start_bit, uint16_t bit_length)
 {
   uint64_t value = 0;
@@ -190,6 +196,7 @@ uint64_t DbcProtocol::extractIntel(const std::array<uint8_t, 8> & data, uint16_t
 }
 
 /** Extract big-endian (Motorola) bit field from 8-byte CAN payload. */
+/** 从 8 字节 CAN 载荷中提取大端（Motorola）位域。 */
 uint64_t DbcProtocol::extractMotorola(const std::array<uint8_t, 8> & data, uint16_t start_bit, uint16_t bit_length)
 {
   uint64_t value = 0;
@@ -205,6 +212,7 @@ uint64_t DbcProtocol::extractMotorola(const std::array<uint8_t, 8> & data, uint1
 }
 
 /** Insert little-endian bit field into 8-byte CAN payload. */
+/** 将小端位域插入 8 字节 CAN 载荷。 */
 void DbcProtocol::insertIntel(std::array<uint8_t, 8> & data, uint16_t start_bit, uint16_t bit_length, uint64_t raw_value)
 {
   for (uint16_t i = 0; i < bit_length; ++i) {
@@ -215,6 +223,7 @@ void DbcProtocol::insertIntel(std::array<uint8_t, 8> & data, uint16_t start_bit,
 }
 
 /** Insert big-endian (Motorola) bit field into 8-byte CAN payload. */
+/** 将大端（Motorola）位域插入 8 字节 CAN 载荷。 */
 void DbcProtocol::insertMotorola(
   std::array<uint8_t, 8> & data, uint16_t start_bit, uint16_t bit_length, uint64_t raw_value)
 {
@@ -230,6 +239,7 @@ void DbcProtocol::insertMotorola(
 }
 
 /** Sign-extend raw integer value according to bit width. */
+/** 按位宽对原始整数值进行符号扩展。 */
 int64_t DbcProtocol::signExtend(uint64_t raw_value, uint16_t bit_length)
 {
   if (bit_length == 0 || bit_length >= 64) {

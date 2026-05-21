@@ -4,6 +4,7 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     """Start the keyboard SCU control helper node."""
+    # 启动键盘 SCU 控制辅助节点。
     return LaunchDescription([
         Node(
             package='chassis_driver',

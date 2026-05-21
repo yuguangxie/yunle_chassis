@@ -6,6 +6,7 @@ import os
 
 def generate_launch_description():
     """Create launch description that starts chassis_driver_node with unified parameters."""
+    # 创建使用统一参数启动 chassis_driver_node 的 launch 描述。
     pkg_share = get_package_share_directory('chassis_driver')
     node_config = os.path.join(pkg_share, 'config', 'chassis_driver.yaml')
 

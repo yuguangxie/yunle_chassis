@@ -16,6 +16,7 @@ namespace chassis_driver
 namespace
 {
 /** Parse k:v parameter entries into hash map. */
+/** 将 k:v 形式的参数条目解析为哈希表。 */
 std::unordered_map<std::string, std::string> parseMap(const std::vector<std::string> & entries)
 {
   std::unordered_map<std::string, std::string> out;
@@ -30,6 +31,7 @@ std::unordered_map<std::string, std::string> parseMap(const std::vector<std::str
 }
 
 /** Convert internal CAN frame to ROS message with timestamp. */
+/** 将内部 CAN 帧转换为带时间戳的 ROS 消息。 */
 chassis_interfaces::msg::CanFrame toRosFrame(const CanFrame & frame, const rclcpp::Time & stamp)
 {
   chassis_interfaces::msg::CanFrame msg;
@@ -44,6 +46,7 @@ chassis_interfaces::msg::CanFrame toRosFrame(const CanFrame & frame, const rclcp
 }
 
 /** Format a CAN frame as a compact hexadecimal string for operator logs. */
+/** 将 CAN 帧格式化为紧凑的十六进制字符串用于操作日志。 */
 std::string formatCanFrameHex(const CanFrame & frame, uint8_t channel, const std::string & message_name)
 {
   std::ostringstream ss;
@@ -65,6 +68,7 @@ std::string formatCanFrameHex(const CanFrame & frame, uint8_t channel, const std
 }  // namespace
 
 /** Build node, setup publishers/subscribers, network channels and RX threads. */
+/** 构建节点，创建发布器/订阅器、网络通道和接收线程。 */
 ChassisDriverNode::ChassisDriverNode()
 : Node("chassis_driver_node")
 {
@@ -112,12 +116,14 @@ ChassisDriverNode::ChassisDriverNode()
 }
 
 /** Ensure threads are stopped before destruction. */
+/** 析构前确保线程已经停止。 */
 ChassisDriverNode::~ChassisDriverNode()
 {
   stopThreads();
 }
 
 /** Declare/read ROS parameters and build message-channel lookup tables. */
+/** 声明/读取 ROS 参数并构建报文-通道查找表。 */
 void ChassisDriverNode::loadParameters()
 {
   declare_parameter<std::string>("topic_prefix", "/yunle_chassis");
@@ -205,6 +211,7 @@ void ChassisDriverNode::loadParameters()
 }
 
 /** Open CAN1/CAN2 UDP channels using configured addresses and ports. */
+/** 使用配置的地址和端口打开 CAN1/CAN2 UDP 通道。 */
 void ChassisDriverNode::initializeChannels()
 {
   if (!can1_.open(local_ip_, static_cast<uint16_t>(can1_local_port_), can1_remote_ip_,
@@ -220,6 +227,7 @@ void ChassisDriverNode::initializeChannels()
 }
 
 /** Start background RX loops for both channels. */
+/** 启动两个通道的后台接收循环。 */
 void ChassisDriverNode::startThreads()
 {
   running_.store(true);
@@ -228,6 +236,7 @@ void ChassisDriverNode::startThreads()
 }
 
 /** Stop RX loops and join all worker threads. */
+/** 停止接收循环并等待所有工作线程退出。 */
 void ChassisDriverNode::stopThreads()
 {
   running_.store(false);
@@ -238,6 +247,7 @@ void ChassisDriverNode::stopThreads()
 }
 
 /** Channel receive loop: fetch UDP payload, decode frames, and route each frame. */
+/** 通道接收循环：获取 UDP 载荷、解析帧并路由每一帧。 */
 void ChassisDriverNode::rxLoop(uint8_t channel_id)
 {
   auto & channel = channel_id == 1 ? can1_ : can2_;
@@ -260,6 +270,7 @@ void ChassisDriverNode::rxLoop(uint8_t channel_id)
 }
 
 /** Encode and send control frame over resolved channel and publish TX raw topic. */
+/** 通过解析出的通道编码并发送控制帧，同时发布 TX 原始话题。 */
 void ChassisDriverNode::sendControlFrame(const CanFrame & frame, const std::string & message_name)
 {
   const auto packed = CanEthernetCodec::encodeFrame(frame);
@@ -281,6 +292,7 @@ void ChassisDriverNode::sendControlFrame(const CanFrame & frame, const std::stri
 }
 
 /** Decode known CAN IDs and publish typed feedback topics. */
+/** 解析已知 CAN ID 并发布强类型反馈话题。 */
 void ChassisDriverNode::publishDecoded(const CanFrame & frame)
 {
   const rclcpp::Time stamp = now();
@@ -370,6 +382,7 @@ void ChassisDriverNode::publishDecoded(const CanFrame & frame)
 }
 
 /** Publish raw RX frame when enabled. */
+/** 在启用时发布原始 RX 帧。 */
 void ChassisDriverNode::publishRawRx(const CanFrame & frame)
 {
   if (!publish_raw_can_) return;
@@ -377,6 +390,7 @@ void ChassisDriverNode::publishRawRx(const CanFrame & frame)
 }
 
 /** Publish raw TX frame when enabled. */
+/** 在启用时发布原始 TX 帧。 */
 void ChassisDriverNode::publishRawTx(const CanFrame & frame)
 {
   if (!publish_raw_can_) return;
@@ -384,6 +398,7 @@ void ChassisDriverNode::publishRawTx(const CanFrame & frame)
 }
 
 /** Publish unknown-frame debug message when enabled. */
+/** 在启用时发布未知帧调试消息。 */
 void ChassisDriverNode::publishUnknownFrame(const CanFrame & frame)
 {
   if (!publish_unknown_frames_ || !enable_debug_topics_) return;
@@ -396,6 +411,7 @@ void ChassisDriverNode::publishUnknownFrame(const CanFrame & frame)
 
 
 /** Build topic name by joining configured prefix and suffix. */
+/** 通过拼接配置前缀和后缀构造话题名。 */
 std::string ChassisDriverNode::makeTopicName(const std::string & suffix) const
 {
   if (suffix.empty()) {
@@ -408,18 +424,21 @@ std::string ChassisDriverNode::makeTopicName(const std::string & suffix) const
 }
 
 /** Check whether publisher topic key is enabled by parameter list. */
+/** 检查发布话题 key 是否被参数列表启用。 */
 bool ChassisDriverNode::isPublishTopicEnabled(const std::string & topic_key) const
 {
   return enabled_publish_topics_.count("all") > 0 || enabled_publish_topics_.count(topic_key) > 0;
 }
 
 /** Check whether subscriber topic key is enabled by parameter list. */
+/** 检查订阅话题 key 是否被参数列表启用。 */
 bool ChassisDriverNode::isSubscribeTopicEnabled(const std::string & topic_key) const
 {
   return enabled_subscribe_topics_.count("all") > 0 || enabled_subscribe_topics_.count(topic_key) > 0;
 }
 
-/** Resolve channel ID from configured map with fallback to channel 1. */
+/** Resolve channel ID from configured map; throw when mapping is missing. */
+/** 从配置映射中解析通道 ID；缺少映射时抛出异常。 */
 uint8_t ChassisDriverNode::resolveChannel(const std::string & message_name, bool tx) const
 {
   const auto & map = tx ? control_channel_map_ : feedback_channel_map_;

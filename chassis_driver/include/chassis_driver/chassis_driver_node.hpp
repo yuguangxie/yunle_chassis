@@ -35,72 +35,96 @@ class ControlCommandBridge;
 
 /**
  * @brief ROS2 chassis driver node handling UDP-CAN bridging and topic I/O.
+ * @brief ROS2 底盘驱动节点，负责 UDP-CAN 桥接和 ROS2 话题输入输出。
  */
 class ChassisDriverNode : public rclcpp::Node
 {
 public:
   /** @brief Construct node, load parameters, initialize channels and worker threads. */
+  /** @brief 构造节点，加载参数，初始化通道和工作线程。 */
   ChassisDriverNode();
 
   /** @brief Stop worker threads and release resources. */
+  /** @brief 停止工作线程并释放资源。 */
   ~ChassisDriverNode() override;
 
   /**
    * @brief Encode and send one control CAN frame to mapped channel.
    * @param frame CAN frame to transmit.
    * @param message_name DBC message name used for channel lookup.
+   * @brief 编码并向映射通道发送一帧控制 CAN 报文。
+   * @param frame 待发送的 CAN 帧。
+   * @param message_name 用于查询发送通道的 DBC 报文名。
    */
   void sendControlFrame(const CanFrame & frame, const std::string & message_name);
 
   /**
    * @brief Decode CAN frame by DBC and publish mapped ROS feedback message.
    * @param frame CAN frame received from chassis.
+   * @brief 按 DBC 解析 CAN 帧并发布对应 ROS 反馈消息。
+   * @param frame 从底盘接收到的 CAN 帧。
    */
   void publishDecoded(const CanFrame & frame);
 
   /** @brief Publish raw received CAN frame topic for diagnostics. */
+  /** @brief 发布原始接收 CAN 帧话题用于诊断。 */
   void publishRawRx(const CanFrame & frame);
 
   /** @brief Publish raw transmitted CAN frame topic for diagnostics. */
+  /** @brief 发布原始发送 CAN 帧话题用于诊断。 */
   void publishRawTx(const CanFrame & frame);
 
   /** @brief Publish unknown frame info when no DBC message mapping is found. */
+  /** @brief 在找不到 DBC 报文映射时发布未知帧信息。 */
   void publishUnknownFrame(const CanFrame & frame);
 
   /**
    * @brief Resolve configured channel ID for a message name.
    * @param message_name DBC message name.
    * @param tx True for control message map, false for feedback map.
-   * @return Channel ID (1 or 2), defaults to 1 when map entry is missing.
+   * @return Channel ID (1 or 2); throws when map entry is missing.
+   * @brief 根据报文名解析配置中的通道 ID。
+   * @param message_name DBC 报文名。
+   * @param tx 为 true 时查询控制报文映射，为 false 时查询反馈报文映射。
+   * @return 通道 ID（1 或 2）；缺少映射项时抛出异常。
    */
   uint8_t resolveChannel(const std::string & message_name, bool tx) const;
 
 private:
   /** @brief Declare and fetch ROS parameters into member fields. */
+  /** @brief 声明并读取 ROS 参数到成员变量。 */
   void loadParameters();
 
   /** @brief Open UDP channels according to loaded network parameters. */
+  /** @brief 按已加载的网络参数打开 UDP 通道。 */
   void initializeChannels();
 
   /** @brief Start RX worker threads for both CAN channels. */
+  /** @brief 启动两个 CAN 通道的接收工作线程。 */
   void startThreads();
 
   /** @brief Request stop and join RX worker threads. */
+  /** @brief 请求停止并等待接收工作线程退出。 */
   void stopThreads();
 
   /**
    * @brief Receive loop of one channel: UDP receive -> decode -> publish/route.
    * @param channel_id Logical channel ID (1 or 2).
+   * @brief 单通道接收循环：UDP 接收 -> 解码 -> 发布/路由。
+   * @param channel_id 逻辑通道 ID（1 或 2）。
    */
   void rxLoop(uint8_t channel_id);
 
   /** @brief Build full topic name based on configured prefix and relative suffix. */
+  /** @brief 根据配置前缀和相对后缀构造完整话题名。 */
   std::string makeTopicName(const std::string & suffix) const;
 
   /** @brief Check whether one logical publisher is enabled by configuration. */
+  /** @brief 检查某个逻辑发布话题是否被配置启用。 */
   bool isPublishTopicEnabled(const std::string & topic_key) const;
 
   /** @brief Check whether one logical subscriber is enabled by configuration. */
+  /** @brief 检查某个逻辑订阅话题是否被配置启用。 */
   bool isSubscribeTopicEnabled(const std::string & topic_key) const;
 
   std::string topic_prefix_;
