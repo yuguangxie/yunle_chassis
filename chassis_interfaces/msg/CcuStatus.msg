@@ -10,6 +10,9 @@ uint8 ccu_drive_mode
 bool remote_brake_request_status
 bool emergency_brake_request_status
 bool scu_brake_signal_status
+bool touch_brake_request_status
+bool handle_brake_request_status
+bool handle_mode_flag_status
 bool left_turn_light_status
 bool right_turn_light_status
 bool position_light_status

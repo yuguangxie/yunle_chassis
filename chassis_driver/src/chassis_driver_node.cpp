@@ -271,19 +271,15 @@ void ChassisDriverNode::publishDecoded(const CanFrame & frame)
     case 119U: {
       chassis_interfaces::msg::VcuWarningLevel msg;
       msg.stamp = stamp;
-      msg.bms_charge_current_warning = static_cast<uint8_t>(get("BMS_Charge_Current_Warning"));
-      msg.bms_discharge_current_warning = static_cast<uint8_t>(get("BMS_Discharge_Current_Warning"));
       msg.bms_soc_warning = static_cast<uint8_t>(get("BMS_SOC_Warning"));
-      msg.bms_temperature_warning = static_cast<uint8_t>(get("BMS_Temperature_Warning"));
-      msg.mcu_current_warning = static_cast<uint8_t>(get("MCU_Current_Warning"));
       msg.mcu_disconnect_warning = static_cast<uint8_t>(get("MCU_Disconnect_Warning"));
       msg.mcu_motor_warning = static_cast<uint8_t>(get("MCU_Motor_Warning"));
       msg.mcu_speed_warning = static_cast<uint8_t>(get("MCU_Speed_Warning"));
-      msg.mcu_temperature_warning = static_cast<uint8_t>(get("MCU_Temperature_Warning"));
-      msg.mcu_voltage_warning = static_cast<uint8_t>(get("MCU_Voltage_Warning"));
       msg.steering_disconnect_warning = static_cast<uint8_t>(get("Steering_Disconnect_Warning"));
       msg.steering_lock_warning = static_cast<uint8_t>(get("Steering_Lock_Warning"));
       msg.steering_uncontrollable_warning = static_cast<uint8_t>(get("Steering_Uncontrollable_Warning"));
+      msg.steering_error_warning = static_cast<uint8_t>(get("Steering_Error_Warning"));
+      msg.brake_error_warning = static_cast<uint8_t>(get("Brake_Error_Warning"));
       if (vcu_warning_pub_) { vcu_warning_pub_->publish(msg); }
       break;
     }
@@ -311,6 +307,9 @@ void ChassisDriverNode::publishDecoded(const CanFrame & frame)
       msg.remote_brake_request_status = get("Remote_Brake_Request_Status") > 0.5;
       msg.emergency_brake_request_status = get("Emergency_Brake_Request_Status") > 0.5;
       msg.scu_brake_signal_status = get("SCU_Brake_Signal_Status") > 0.5;
+      msg.touch_brake_request_status = get("Touch_Brake_Request_Status") > 0.5;
+      msg.handle_brake_request_status = get("Handle_Brake_Request_Status") > 0.5;
+      msg.handle_mode_flag_status = get("Handle_Mode_Flag_Status") > 0.5;
       msg.left_turn_light_status = get("Left_Turn_Light_Status") > 0.5;
       msg.right_turn_light_status = get("Right_Turn_Light_Status") > 0.5;
       msg.position_light_status = get("Position_Light_Status") > 0.5;

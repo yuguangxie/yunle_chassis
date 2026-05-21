@@ -16,6 +16,8 @@ The DBC confirms `BO_TX_BU_` includes `ACU` for these message IDs, so the driver
 
 No runtime DBC parsing is performed. All required DBC definitions are hardcoded in C++ (`DbcProtocol`) with static maps and manual bit encode/decode.
 
+The current hardcoded protocol is aligned with `Yunle_CAN_release.dbc`.
+
 ## Packages
 
 - `chassis_interfaces`: custom `.msg` files.
