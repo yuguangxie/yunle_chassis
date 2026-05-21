@@ -115,7 +115,6 @@ All topic names below assume default `topic_prefix=/yunle_chassis`.
 |---|---|---|---|---|
 | `/yunle_chassis/can_rx/raw` | `chassis_interfaces/msg/CanFrame` | Each decoded UDP CAN record when `publish_raw_can` is true | Raw UDP payload decoded by `CanEthernetCodec::decodePayload()` | `ChassisDriverNode::publishRawRx()` |
 | `/yunle_chassis/can_tx/raw` | `chassis_interfaces/msg/CanFrame` | Each successful control-frame send when `publish_raw_can` is true | TX frame after `UdpChannel::send()` succeeds | `ChassisDriverNode::publishRawTx()` |
-| `/yunle_chassis/debug/status` | `std_msgs/msg/String` | Publisher exists, but no publish call found | Not used in current source | Created in constructor |
 | `/yunle_chassis/debug/unknown_frames` | `std_msgs/msg/String` | Unknown CAN ID in `publishDecoded()` default case | Any received frame not handled by the switch | `ChassisDriverNode::publishUnknownFrame()` |
 | `/yunle_chassis/feedback/bms_status` | `chassis_interfaces/msg/BmsStatus` | On received CAN ID 256 | `BMS_Status` | `ChassisDriverNode::publishDecoded()` |
 | `/yunle_chassis/feedback/vcu_warning_level` | `chassis_interfaces/msg/VcuWarningLevel` | On received CAN ID 119 | `VCU_Warning_Level` | `ChassisDriverNode::publishDecoded()` |
@@ -304,7 +303,7 @@ What is not found:
 - No reconnect mechanism.
 - No source-address validation for incoming UDP datagrams.
 - No mutex around ROS publisher calls from the two RX threads. rclcpp publisher use is generally intended to be thread-safe, but this should be confirmed for the target ROS2 distro and executor model before high-rate production use. This is a risk note, not a confirmed bug.
-- `debug_status_pub_` is created but not used.
+- The unused `/yunle_chassis/debug/status` publisher was removed; current debug output uses `/yunle_chassis/debug/unknown_frames`.
 
 Potential real-time risks:
 

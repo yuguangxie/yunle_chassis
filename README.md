@@ -84,7 +84,6 @@ All driver/network parameters are merged into one file:
 ### Raw/debug topics
 - `/yunle_chassis/can_rx/raw`
 - `/yunle_chassis/can_tx/raw`
-- `/yunle_chassis/debug/status`
 - `/yunle_chassis/debug/unknown_frames`
 
 ## Control command examples

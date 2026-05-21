@@ -20,7 +20,6 @@ chassis_driver_node:
     # Available publish keys:
     #   can_rx_raw
     #   can_tx_raw
-    #   debug_status
     #   debug_unknown_frames
     #   feedback_bms_status
     #   feedback_vcu_warning_level

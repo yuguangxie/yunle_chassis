@@ -137,7 +137,6 @@ private:
 
   rclcpp::Publisher<chassis_interfaces::msg::CanFrame>::SharedPtr raw_rx_pub_;
   rclcpp::Publisher<chassis_interfaces::msg::CanFrame>::SharedPtr raw_tx_pub_;
-  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr debug_status_pub_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr unknown_frame_pub_;
 
   rclcpp::Publisher<chassis_interfaces::msg::BmsStatus>::SharedPtr bms_status_pub_;

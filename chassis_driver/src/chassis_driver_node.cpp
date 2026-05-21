@@ -56,9 +56,6 @@ ChassisDriverNode::ChassisDriverNode()
   if (isPublishTopicEnabled("can_tx_raw")) {
     raw_tx_pub_ = create_publisher<chassis_interfaces::msg::CanFrame>(makeTopicName("can_tx/raw"), qos);
   }
-  if (isPublishTopicEnabled("debug_status")) {
-    debug_status_pub_ = create_publisher<std_msgs::msg::String>(makeTopicName("debug/status"), qos);
-  }
   if (isPublishTopicEnabled("debug_unknown_frames")) {
     unknown_frame_pub_ = create_publisher<std_msgs::msg::String>(makeTopicName("debug/unknown_frames"), qos);
   }

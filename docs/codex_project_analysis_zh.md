@@ -115,7 +115,6 @@ Launch：
 |---|---|---|---|---|
 | `/yunle_chassis/can_rx/raw` | `chassis_interfaces/msg/CanFrame` | `publish_raw_can` 为 true 时，每个解码出的 UDP CAN record 都发布 | `CanEthernetCodec::decodePayload()` 解码出的原始 UDP payload | `ChassisDriverNode::publishRawRx()` |
 | `/yunle_chassis/can_tx/raw` | `chassis_interfaces/msg/CanFrame` | `publish_raw_can` 为 true 时，每次控制帧成功发送后发布 | `UdpChannel::send()` 成功后的 TX frame | `ChassisDriverNode::publishRawTx()` |
-| `/yunle_chassis/debug/status` | `std_msgs/msg/String` | publisher 存在，但未发现 publish 调用 | 当前源码未使用 | 构造函数中创建 |
 | `/yunle_chassis/debug/unknown_frames` | `std_msgs/msg/String` | `publishDecoded()` default 分支遇到未知 CAN ID 时发布 | 任意未被 switch 处理的接收帧 | `ChassisDriverNode::publishUnknownFrame()` |
 | `/yunle_chassis/feedback/bms_status` | `chassis_interfaces/msg/BmsStatus` | 收到 CAN ID 256 时 | `BMS_Status` | `ChassisDriverNode::publishDecoded()` |
 | `/yunle_chassis/feedback/vcu_warning_level` | `chassis_interfaces/msg/VcuWarningLevel` | 收到 CAN ID 119 时 | `VCU_Warning_Level` | `ChassisDriverNode::publishDecoded()` |
@@ -304,7 +303,7 @@ flowchart LR
 - 未发现重连机制。
 - 未发现对输入 UDP datagram 的源地址校验。
 - 两个 RX 线程调用 ROS publisher 时未看到额外 mutex。rclcpp publisher 通常设计为可多线程使用，但面向目标 ROS2 发行版和高频负载仍应确认。这是风险提示，不是已确认 bug。
-- `debug_status_pub_` 被创建但未使用。
+- 未使用的 `/yunle_chassis/debug/status` publisher 已删除；当前 debug 输出使用 `/yunle_chassis/debug/unknown_frames`。
 
 潜在实时性风险：
 
