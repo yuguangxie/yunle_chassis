@@ -86,9 +86,5 @@ chassis_driver_node:
     scu_control_max_steering_angle_deg: 27.0
 
     # Maximum accepted positive speed magnitude for SCU_Target_Speed.
-    # Commands above this value are treated as invalid and are not sent.
+    # Values outside [0, max] are logged and sent as 0.
     scu_control_max_target_speed_kmh: 15.0
-
-    # Default drive mode when ScuControlCommand.scu_drive_mode_request is 0.
-    # 1 = automatic-driving mode request, 3 = remote-controller mode request.
-    scu_control_default_drive_mode_request: 1

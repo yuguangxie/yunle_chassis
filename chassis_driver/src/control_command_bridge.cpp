@@ -3,7 +3,6 @@
 #include "chassis_driver/chassis_driver_node.hpp"
 #include "chassis_driver/dbc_protocol.hpp"
 
-#include <algorithm>
 #include <cmath>
 
 namespace chassis_driver
@@ -15,7 +14,6 @@ constexpr uint8_t kShiftD = 1U;
 constexpr uint8_t kShiftN = 2U;
 constexpr uint8_t kShiftR = 3U;
 constexpr uint8_t kDriveAuto = 1U;
-constexpr uint8_t kDriveRemote = 3U;
 constexpr double kSteeringRawAtMaxAngle = 120.0;
 
 bool isValidShiftRequest(uint8_t value)
@@ -23,15 +21,9 @@ bool isValidShiftRequest(uint8_t value)
   return value == kShiftD || value == kShiftN || value == kShiftR;
 }
 
-bool isValidDriveModeRequest(uint8_t value)
-{
-  return value == kDriveAuto || value == kDriveRemote;
-}
-
 double steeringAngleDegToCanRaw(double angle_deg, double max_angle_deg)
 {
-  const double clamped = std::clamp(angle_deg, -max_angle_deg, max_angle_deg);
-  const int raw_signed = static_cast<int>(std::llround(clamped / max_angle_deg * kSteeringRawAtMaxAngle));
+  const int raw_signed = static_cast<int>(std::llround(angle_deg / max_angle_deg * kSteeringRawAtMaxAngle));
   return static_cast<double>(raw_signed < 0 ? 256 + raw_signed : raw_signed);
 }
 }  // namespace
@@ -55,42 +47,41 @@ ControlCommandBridge::ControlCommandBridge(ChassisDriverNode & node)
         return;
       }
 
-      uint8_t drive_mode_request = msg->scu_drive_mode_request;
-      if (drive_mode_request == 0U) {
-        drive_mode_request = static_cast<uint8_t>(node_.scu_control_default_drive_mode_request_);
-      } else if (!isValidDriveModeRequest(drive_mode_request)) {
+      double speed_kmh = static_cast<double>(msg->scu_target_speed);
+      if (!std::isfinite(speed_kmh) || speed_kmh < 0.0 || speed_kmh > node_.scu_control_max_target_speed_kmh_) {
         RCLCPP_WARN(
           node_.get_logger(),
-          "SCU_Control_Command drive mode %u is reserved, fallback to default %d",
-          static_cast<unsigned>(drive_mode_request), node_.scu_control_default_drive_mode_request_);
-        drive_mode_request = static_cast<uint8_t>(node_.scu_control_default_drive_mode_request_);
+          "SCU_Control_Command target speed %.3f km/h is outside [0, %.3f], send 0",
+          static_cast<double>(msg->scu_target_speed), node_.scu_control_max_target_speed_kmh_);
+        speed_kmh = 0.0;
       }
 
-      const double speed_kmh = std::abs(static_cast<double>(msg->scu_target_speed));
-      if (!std::isfinite(speed_kmh) || speed_kmh > node_.scu_control_max_target_speed_kmh_) {
+      double front_angle = static_cast<double>(msg->scu_steering_angle_front);
+      if (!std::isfinite(front_angle) || std::abs(front_angle) > node_.scu_control_max_steering_angle_deg_) {
         RCLCPP_WARN(
-          node_.get_logger(),
-          "Drop SCU_Control_Command: target speed %.3f km/h exceeds max %.3f km/h or is not finite",
-          static_cast<double>(msg->scu_target_speed), node_.scu_control_max_target_speed_kmh_);
-        return;
+          node_.get_logger(), "SCU_Control_Command front steering angle %.3f deg is outside [-%.3f, %.3f], send 0",
+          front_angle, node_.scu_control_max_steering_angle_deg_, node_.scu_control_max_steering_angle_deg_);
+        front_angle = 0.0;
       }
-      if (!std::isfinite(static_cast<double>(msg->scu_steering_angle_front)) ||
-        !std::isfinite(static_cast<double>(msg->scu_steering_angle_rear)))
-      {
-        RCLCPP_WARN(node_.get_logger(), "Drop SCU_Control_Command: steering angle is not finite");
-        return;
+
+      double rear_angle = static_cast<double>(msg->scu_steering_angle_rear);
+      if (!std::isfinite(rear_angle) || std::abs(rear_angle) > node_.scu_control_max_steering_angle_deg_) {
+        RCLCPP_WARN(
+          node_.get_logger(), "SCU_Control_Command rear steering angle %.3f deg is outside [-%.3f, %.3f], send 0",
+          rear_angle, node_.scu_control_max_steering_angle_deg_, node_.scu_control_max_steering_angle_deg_);
+        rear_angle = 0.0;
       }
 
       const double front_raw = steeringAngleDegToCanRaw(
-        msg->scu_steering_angle_front, node_.scu_control_max_steering_angle_deg_);
+        front_angle, node_.scu_control_max_steering_angle_deg_);
       const double rear_raw = steeringAngleDegToCanRaw(
-        msg->scu_steering_angle_rear, node_.scu_control_max_steering_angle_deg_);
+        rear_angle, node_.scu_control_max_steering_angle_deg_);
 
       CanFrame frame;
       frame.can_id = 289U;
       frame.dlc = 8;
       DbcProtocol::encodeSignal(frame, "SCU_Shift_Level_Request", msg->scu_shift_level_request);
-      DbcProtocol::encodeSignal(frame, "SCU_Drive_Mode_Request", drive_mode_request);
+      DbcProtocol::encodeSignal(frame, "SCU_Drive_Mode_Request", kDriveAuto);
       DbcProtocol::encodeSignal(frame, "SCU_Steering_Angle_Front", front_raw);
       DbcProtocol::encodeSignal(frame, "SCU_Steering_Angle_Rear", rear_raw);
       DbcProtocol::encodeSignal(frame, "SCU_Target_Speed", speed_kmh);

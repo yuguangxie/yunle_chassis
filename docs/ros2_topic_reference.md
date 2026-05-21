@@ -310,8 +310,7 @@ Unknown frame: id=<can_id> ext=<is_extended> ch=<channel>
 | 参数 | 默认值 | 作用 |
 |---|---:|---|
 | `scu_control_max_steering_angle_deg` | `27.0` | 将 ROS 侧前/后转向角度转换为 0x121 8 bit 补码 raw 时使用的车辆最大转角 |
-| `scu_control_max_target_speed_kmh` | `15.0` | 允许下发的最大目标速度；超过该值的命令会被拒发 |
-| `scu_control_default_drive_mode_request` | `1` | 当 ROS 消息中 `scu_drive_mode_request=0` 时默认下发的驾驶模式 |
+| `scu_control_max_target_speed_kmh` | `15.0` | 允许下发的最大目标速度；超出 `[0, max]` 的值会记录 warning 并按 0 下发 |
 
 字段说明：
 
@@ -320,13 +319,11 @@ Unknown frame: id=<can_id> ext=<is_extended> ch=<channel>
 | `SHIFT_LEVEL_D=1` | constant | - | - | D 档 |
 | `SHIFT_LEVEL_N=2` | constant | - | - | N 档 |
 | `SHIFT_LEVEL_R=3` | constant | - | - | R 档 |
-| `DRIVE_MODE_AUTO=1` | constant | - | - | 自动驾驶模式请求 |
-| `DRIVE_MODE_REMOTE=3` | constant | - | - | 遥控器模式请求 |
 | `scu_shift_level_request` | `uint8` | `SCU_Shift_Level_Request` | `0|2` | 当前代码只接受 `1=D`、`2=N`、`3=R`；其他值拒发本帧 |
-| `scu_drive_mode_request` | `uint8` | `SCU_Drive_Mode_Request` | `6|2` | ROS 值为 `0` 时使用默认参数；`1` 和 `3` 为有效输入；其他值回退到默认值 |
-| `scu_steering_angle_front` | `float32` | `SCU_Steering_Angle_Front` | `8|8` | ROS 侧单位 deg；按最大转角 clamp 后转换为 8 bit 补码 raw |
-| `scu_steering_angle_rear` | `float32` | `SCU_Steering_Angle_Rear` | `16|8` | ROS 侧单位 deg；按最大转角 clamp 后转换为 8 bit 补码 raw |
-| `scu_target_speed` | `float32` | `SCU_Target_Speed` | `24|9` | ROS 侧单位 km/h；当前代码发送绝对值；超过最大速度参数或非有限数时拒发本帧 |
+| 无 ROS 输入 | - | `SCU_Drive_Mode_Request` | `6|2` | 当前代码固定下发 `1`，即自动驾驶模式请求 |
+| `scu_steering_angle_front` | `float32` | `SCU_Steering_Angle_Front` | `8|8` | ROS 侧单位 deg；有效范围内转换为 8 bit 补码 raw；非有限数或超范围值记录 warning 并按 0 下发 |
+| `scu_steering_angle_rear` | `float32` | `SCU_Steering_Angle_Rear` | `16|8` | ROS 侧单位 deg；有效范围内转换为 8 bit 补码 raw；非有限数或超范围值记录 warning 并按 0 下发 |
+| `scu_target_speed` | `float32` | `SCU_Target_Speed` | `24|9` | ROS 侧单位 km/h；只接受 `[0, max]`，非有限数、负值或超范围值记录 warning 并按 0 下发 |
 | `scu_brake_enable` | `bool` | `SCU_Brake_Enable` | `33|1` | `true=1`，`false=0` |
 | `gw_left_turn_light_request` | `uint8` | `GW_Left_Turn_Light_Request` | `40|2` | 协议文档：`0` 闭合，`1` 打开，`2/3` 预留 |
 | `gw_right_turn_light_request` | `uint8` | `GW_Right_Turn_Light_Request` | `42|2` | 协议文档：`0` 闭合，`1` 打开，`2/3` 预留 |
@@ -432,7 +429,6 @@ else:
 ```bash
 ros2 topic pub /yunle_chassis/control/scu_control_command chassis_interfaces/msg/ScuControlCommand "{
   scu_shift_level_request: 1,
-  scu_drive_mode_request: 0,
   scu_steering_angle_front: 0.0,
   scu_steering_angle_rear: 0.0,
   scu_target_speed: 3.0,
@@ -452,7 +448,6 @@ ros2 topic pub /yunle_chassis/control/scu_control_command chassis_interfaces/msg
 ```bash
 ros2 topic pub /yunle_chassis/control/scu_control_command chassis_interfaces/msg/ScuControlCommand "{
   scu_shift_level_request: 2,
-  scu_drive_mode_request: 0,
   scu_steering_angle_front: 0.0,
   scu_steering_angle_rear: 0.0,
   scu_target_speed: 0.0,

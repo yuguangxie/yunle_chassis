@@ -92,7 +92,6 @@ All driver/network parameters are merged into one file:
 ```bash
 ros2 topic pub --once /yunle_chassis/control/scu_control_command chassis_interfaces/msg/ScuControlCommand "{
   scu_shift_level_request: 1,
-  scu_drive_mode_request: 2,
   scu_steering_angle_front: 10.0,
   scu_steering_angle_rear: 0.0,
   scu_target_speed: 12.3,

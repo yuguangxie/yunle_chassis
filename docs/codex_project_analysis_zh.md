@@ -103,8 +103,7 @@ Launch：
 | `udp_buffer_size` | `2048` | 接收缓冲区大小。 |
 | `socket_timeout_ms` | `200` | UDP 接收超时时间。 |
 | `scu_control_max_steering_angle_deg` | `27.0` | 0x121 封装参数：车辆实际最大转角，用于将 `/control/scu_control_command` 的前/后转向角度值换算成 8 位补码 raw。 |
-| `scu_control_max_target_speed_kmh` | `15.0` | 0x121 封装参数：允许下发的最大正目标速度；超过该值的命令会被拒发。 |
-| `scu_control_default_drive_mode_request` | `1` | 0x121 封装参数：当 `ScuControlCommand.scu_drive_mode_request` 为 0 时默认下发的驾驶模式；当前默认 1，即自动驾驶模式请求。 |
+| `scu_control_max_target_speed_kmh` | `15.0` | 0x121 封装参数：允许的目标速度范围为 `[0, max]`；超出范围的值会记录 warning 并按 0 下发。 |
 
 ## 6. ROS2 接口
 
@@ -130,7 +129,7 @@ Launch：
 
 | Topic | 消息类型 | 回调位置 | 含义 | CAN 输出 |
 |---|---|---|---|---|
-| `/yunle_chassis/control/scu_control_command` | `chassis_interfaces/msg/ScuControlCommand` | `control_command_bridge.cpp:16`，`ControlCommandBridge::ControlCommandBridge()` 内 lambda | 档位、驱动模式、前/后转向角、目标速度、制动使能、灯光请求、模式和有效位 | CAN ID 289 `SCU_Control_Command`，通过 `sendControlFrame()` 发送 |
+| `/yunle_chassis/control/scu_control_command` | `chassis_interfaces/msg/ScuControlCommand` | `control_command_bridge.cpp:16`，`ControlCommandBridge::ControlCommandBridge()` 内 lambda | 档位、前/后转向角、目标速度、制动使能、灯光请求、模式和有效位；CAN 驾驶模式由驱动固定为 1 | CAN ID 289 `SCU_Control_Command`，通过 `sendControlFrame()` 发送 |
 | `/yunle_chassis/control/scu_chassis_command` | `chassis_interfaces/msg/ScuChassisCommand` | `control_command_bridge.cpp:41`，`ControlCommandBridge::ControlCommandBridge()` 内 lambda | 转向角速度和四路制动力命令 | CAN ID 294 `SCU_Chassis_Command`，通过 `sendControlFrame()` 发送 |
 | `/yunle_chassis/control/scu_torque_command` | `chassis_interfaces/msg/ScuTorqueCommand` | `control_command_bridge.cpp:57`，`ControlCommandBridge::ControlCommandBridge()` 内 lambda | 四轮扭矩命令 | CAN ID 291 `SCU_Torque_Command`，通过 `sendControlFrame()` 发送 |
 | `/yunle_chassis/control/vcu_chassis_debug` | `chassis_interfaces/msg/VcuChassisDebug` | `ControlCommandBridge::ControlCommandBridge()` 内 lambda | 整合后的底盘调试控制命令，逻辑名 `VCU_Chassis_Debug` | CAN ID 1808 `VCU_Debug_Enable` 和 CAN ID 1813 `VCU_Drive_Debug`，通过 `sendControlFrame()` 发送 |
@@ -138,9 +137,9 @@ Launch：
 `/yunle_chassis/control/scu_control_command` 运行时封装说明：
 
 - `ScuControlCommand.scu_shift_level_request` 只接受 `1=D`、`2=N`、`3=R`；非法值会在 CAN 发送前拒发。
-- `ScuControlCommand.scu_drive_mode_request=0` 时使用参数 `scu_control_default_drive_mode_request`，默认值为 `1`。
-- `scu_steering_angle_front` 和 `scu_steering_angle_rear` 是 ROS 侧物理角度，单位 deg；驱动会按 `scu_control_max_steering_angle_deg` clamp，并用 `raw_signed = angle_deg / max_angle_deg * 120` 换算为 8 位补码 raw。
-- `scu_target_speed` 按正速度大小处理；驱动发送 `abs(value)`，当其超过 `scu_control_max_target_speed_kmh` 时拒发整条 0x121 命令。
+- `SCU_Drive_Mode_Request` 不再暴露为 `ScuControlCommand` 输入；只要发送 `/control/scu_control_command`，驱动就固定下发该 CAN 信号为 `1`。
+- `scu_steering_angle_front` 和 `scu_steering_angle_rear` 是 ROS 侧物理角度，单位 deg；有效范围内的值会按 `raw_signed = angle_deg / max_angle_deg * 120` 换算为 8 位补码 raw，非有限数或超出 `[-max, +max]` 的值会记录 warning 并按 0 下发。
+- `scu_target_speed` 按非负速度处理；非有限数、负值或超过 `scu_control_max_target_speed_kmh` 的值会记录 warning 并按 0 下发。
 - 与 `docs/云乐线控底盘通信协议使用说明-2026.docx` 的差异详见 `docs/scu_control_command_wrapper_2026.md`。
 
 ### Services 与 Actions

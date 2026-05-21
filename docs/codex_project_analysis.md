@@ -103,8 +103,7 @@ Declared in `ChassisDriverNode::loadParameters()` in `chassis_driver/src/chassis
 | `udp_buffer_size` | `2048` | Receive buffer size. |
 | `socket_timeout_ms` | `200` | UDP receive timeout. |
 | `scu_control_max_steering_angle_deg` | `27.0` | 0x121 wrapper parameter: physical maximum steering angle used to convert `/control/scu_control_command` front/rear steering degrees to 8-bit two's-complement raw. |
-| `scu_control_max_target_speed_kmh` | `15.0` | 0x121 wrapper parameter: maximum accepted positive target speed; commands above this value are rejected and not sent. |
-| `scu_control_default_drive_mode_request` | `1` | 0x121 wrapper parameter: default drive mode sent when `ScuControlCommand.scu_drive_mode_request` is 0. Current default is auto-driving request. |
+| `scu_control_max_target_speed_kmh` | `15.0` | 0x121 wrapper parameter: allowed target speed range is `[0, max]`; values outside the range are logged and sent as 0. |
 
 ## 6. ROS2 Interfaces
 
@@ -130,7 +129,7 @@ Publish frequency is not timer-based in this code. It is exactly event-driven by
 
 | Topic | Message type | Callback location | Meaning | CAN output |
 |---|---|---|---|---|
-| `/yunle_chassis/control/scu_control_command` | `chassis_interfaces/msg/ScuControlCommand` | Lambda in `ControlCommandBridge::ControlCommandBridge()` at `control_command_bridge.cpp:16` | Shift, drive mode, steering front/rear, target speed, brake enable, light requests, mode/valid flags | CAN ID 289 `SCU_Control_Command` via `sendControlFrame()` |
+| `/yunle_chassis/control/scu_control_command` | `chassis_interfaces/msg/ScuControlCommand` | Lambda in `ControlCommandBridge::ControlCommandBridge()` at `control_command_bridge.cpp:16` | Shift, steering front/rear, target speed, brake enable, light requests, mode/valid flags; CAN drive mode is fixed to 1 by the driver | CAN ID 289 `SCU_Control_Command` via `sendControlFrame()` |
 | `/yunle_chassis/control/scu_chassis_command` | `chassis_interfaces/msg/ScuChassisCommand` | Lambda in `ControlCommandBridge::ControlCommandBridge()` at `control_command_bridge.cpp:41` | Steering angle speed and four brake-force commands | CAN ID 294 `SCU_Chassis_Command` via `sendControlFrame()` |
 | `/yunle_chassis/control/scu_torque_command` | `chassis_interfaces/msg/ScuTorqueCommand` | Lambda in `ControlCommandBridge::ControlCommandBridge()` at `control_command_bridge.cpp:57` | Four wheel torque commands | CAN ID 291 `SCU_Torque_Command` via `sendControlFrame()` |
 | `/yunle_chassis/control/vcu_chassis_debug` | `chassis_interfaces/msg/VcuChassisDebug` | Lambda in `ControlCommandBridge::ControlCommandBridge()` | Integrated chassis debug command, logical name `VCU_Chassis_Debug` | CAN IDs 1808 `VCU_Debug_Enable` and 1813 `VCU_Drive_Debug` via `sendControlFrame()` |
@@ -138,9 +137,9 @@ Publish frequency is not timer-based in this code. It is exactly event-driven by
 Runtime wrapper note for `/yunle_chassis/control/scu_control_command`:
 
 - `ScuControlCommand.scu_shift_level_request` is accepted only as `1=D`, `2=N`, or `3=R`; invalid values are rejected before CAN send.
-- `ScuControlCommand.scu_drive_mode_request=0` is replaced with parameter `scu_control_default_drive_mode_request`, default `1`.
-- `scu_steering_angle_front` and `scu_steering_angle_rear` are ROS-side physical degrees. They are clamped by `scu_control_max_steering_angle_deg` and converted to 8-bit two's-complement raw using `raw_signed = angle_deg / max_angle_deg * 120`.
-- `scu_target_speed` is treated as a positive speed magnitude. The driver sends `abs(value)` and rejects the whole 0x121 command if it exceeds `scu_control_max_target_speed_kmh`.
+- `SCU_Drive_Mode_Request` is no longer exposed in `ScuControlCommand`; the driver always sends `1` for this CAN signal when `/control/scu_control_command` is transmitted.
+- `scu_steering_angle_front` and `scu_steering_angle_rear` are ROS-side physical degrees. Valid values in `[-scu_control_max_steering_angle_deg, +scu_control_max_steering_angle_deg]` are converted to 8-bit two's-complement raw using `raw_signed = angle_deg / max_angle_deg * 120`; non-finite or out-of-range values are logged and sent as 0.
+- `scu_target_speed` is treated as a non-negative speed in km/h. Non-finite values, negative values, or values above `scu_control_max_target_speed_kmh` are logged and sent as 0.
 - Detailed differences against `docs/云乐线控底盘通信协议使用说明-2026.docx` are recorded in `docs/scu_control_command_wrapper_2026.md`.
 
 ### Services and Actions
