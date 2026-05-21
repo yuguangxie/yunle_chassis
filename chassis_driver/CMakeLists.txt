@@ -26,6 +26,10 @@ add_executable(chassis_driver_node
   src/udp_channel.cpp
 )
 
+add_executable(keyboard_scu_control_node
+  src/keyboard_scu_control_node.cpp
+)
+
 ament_target_dependencies(chassis_driver_node
   rclcpp
   std_msgs
@@ -33,7 +37,12 @@ ament_target_dependencies(chassis_driver_node
   chassis_interfaces
 )
 
-install(TARGETS chassis_driver_node
+ament_target_dependencies(keyboard_scu_control_node
+  rclcpp
+  chassis_interfaces
+)
+
+install(TARGETS chassis_driver_node keyboard_scu_control_node
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY include/

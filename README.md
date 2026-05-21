@@ -41,6 +41,52 @@ source install/setup.bash
 ros2 launch chassis_driver chassis_driver.launch.py
 ```
 
+## Keyboard control node
+
+The package also provides an optional keyboard helper node that publishes
+`/yunle_chassis/control/scu_control_command` for manual low-speed checkout.
+Run it directly in a terminal that has keyboard focus:
+
+```bash
+ros2 run chassis_driver keyboard_scu_control_node
+```
+
+An example launch file with the default parameters is also provided:
+
+```bash
+ros2 launch chassis_driver keyboard_scu_control.launch.py
+```
+
+For interactive keyboard input, `ros2 run` is recommended because launch
+frontends may not attach stdin to child processes in every terminal setup.
+
+Default key bindings:
+
+- `w` / `s`: select D/R and increase forward/reverse speed
+- `q` / `e`: decrease/increase target speed
+- `a` / `d`: steer left/right
+- `c`: center steering
+- `x`: neutral zero command
+- `Space`: brake and neutral
+- `b`: toggle brake enable
+- `j` / `k` / `u` / `i`: toggle left/right/position/low-beam light request
+- `m`: toggle torque-or-speed mode
+- `v`: toggle steering/brake valid flags
+- `h`: print help
+- `Ctrl-C`: exit
+
+Important parameters in `keyboard_scu_control.launch.py`:
+
+- `topic_name`: target topic, default `/yunle_chassis/control/scu_control_command`
+- `publish_rate_hz`: command publish rate, default `20.0`
+- `speed_step_kmh`: speed increment/decrement per key press, default `0.5`
+- `default_speed_kmh`: first nonzero speed when pressing `w` or `s`, default `1.0`
+- `max_speed_kmh`: keyboard-side speed limit, default `15.0`
+- `steering_step_deg`: steering increment/decrement per key press, default `2.0`
+- `max_steering_angle_deg`: keyboard-side steering limit, default `27.0`
+- `rear_steering_ratio`: rear steering angle as a ratio of front steering, default `0.0`
+- `auto_publish_zero_on_exit`: publish a brake/zero command when the node exits normally, default `true`
+
 ## Unified config file
 
 All driver/network parameters are merged into one file:

@@ -54,6 +54,15 @@ Main executable:
 - Node construction: `auto node = std::make_shared<chassis_driver::ChassisDriverNode>();` in `main.cpp:9`.
 - Executor: `rclcpp::spin(node)` in `main.cpp:10`, so this is a normal single-node process using the default spin path. No explicit `MultiThreadedExecutor` appears in the source.
 
+Keyboard helper executable:
+
+- Target: `keyboard_scu_control_node`.
+- Source entry: `chassis_driver/src/keyboard_scu_control_node.cpp`.
+- Purpose: reads terminal key presses and publishes `chassis_interfaces/msg/ScuControlCommand` to `/yunle_chassis/control/scu_control_command`.
+- Launch: `chassis_driver/launch/keyboard_scu_control.launch.py`.
+- Recommended interactive command: `ros2 run chassis_driver keyboard_scu_control_node`, because launch frontends may not attach stdin in every terminal setup.
+- This helper is independent from the CAN-over-Ethernet driver node; it does not access UDP sockets directly.
+
 Node class:
 
 - `ChassisDriverNode` derives from `rclcpp::Node` in `chassis_driver/include/chassis_driver/chassis_driver_node.hpp`.
@@ -133,6 +142,12 @@ Publish frequency is not timer-based in this code. It is exactly event-driven by
 | `/yunle_chassis/control/scu_chassis_command` | `chassis_interfaces/msg/ScuChassisCommand` | Lambda in `ControlCommandBridge::ControlCommandBridge()` at `control_command_bridge.cpp:41` | Steering angle speed and four brake-force commands | CAN ID 294 `SCU_Chassis_Command` via `sendControlFrame()` |
 | `/yunle_chassis/control/scu_torque_command` | `chassis_interfaces/msg/ScuTorqueCommand` | Lambda in `ControlCommandBridge::ControlCommandBridge()` at `control_command_bridge.cpp:57` | Four wheel torque commands | CAN ID 291 `SCU_Torque_Command` via `sendControlFrame()` |
 | `/yunle_chassis/control/vcu_chassis_debug` | `chassis_interfaces/msg/VcuChassisDebug` | Lambda in `ControlCommandBridge::ControlCommandBridge()` | Integrated chassis debug command, logical name `VCU_Chassis_Debug` | CAN IDs 1808 `VCU_Debug_Enable` and 1813 `VCU_Drive_Debug` via `sendControlFrame()` |
+
+Helper publisher:
+
+| Node | Publishes | Message type | Trigger | Purpose |
+|---|---|---|---|---|
+| `keyboard_scu_control_node` | `/yunle_chassis/control/scu_control_command` | `chassis_interfaces/msg/ScuControlCommand` | Non-blocking terminal key polling plus periodic timer | Manual keyboard control for D/R/N, target speed, steering, brake, lights, mode and valid flags |
 
 Runtime wrapper note for `/yunle_chassis/control/scu_control_command`:
 

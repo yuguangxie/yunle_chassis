@@ -54,6 +54,15 @@ yunle_chassis/
 - 节点构造：`main.cpp:9` 中的 `auto node = std::make_shared<chassis_driver::ChassisDriverNode>();`。
 - Executor：`main.cpp:10` 中调用 `rclcpp::spin(node)`，因此这是一个普通单节点进程，使用默认 spin 路径。源码中未出现显式 `MultiThreadedExecutor`。
 
+键盘辅助控制节点：
+
+- 目标名：`keyboard_scu_control_node`。
+- 源码入口：`chassis_driver/src/keyboard_scu_control_node.cpp`。
+- 作用：读取终端键盘按键，并向 `/yunle_chassis/control/scu_control_command` 发布 `chassis_interfaces/msg/ScuControlCommand`。
+- Launch：`chassis_driver/launch/keyboard_scu_control.launch.py`。
+- 推荐交互式运行命令：`ros2 run chassis_driver keyboard_scu_control_node`，因为某些 launch 前端不会把 stdin 连接到子进程。
+- 该节点独立于以太网转 CAN 驱动节点，不直接访问 UDP socket。
+
 节点类：
 
 - `ChassisDriverNode` 在 `chassis_driver/include/chassis_driver/chassis_driver_node.hpp` 中继承自 `rclcpp::Node`。
@@ -133,6 +142,12 @@ Launch：
 | `/yunle_chassis/control/scu_chassis_command` | `chassis_interfaces/msg/ScuChassisCommand` | `control_command_bridge.cpp:41`，`ControlCommandBridge::ControlCommandBridge()` 内 lambda | 转向角速度和四路制动力命令 | CAN ID 294 `SCU_Chassis_Command`，通过 `sendControlFrame()` 发送 |
 | `/yunle_chassis/control/scu_torque_command` | `chassis_interfaces/msg/ScuTorqueCommand` | `control_command_bridge.cpp:57`，`ControlCommandBridge::ControlCommandBridge()` 内 lambda | 四轮扭矩命令 | CAN ID 291 `SCU_Torque_Command`，通过 `sendControlFrame()` 发送 |
 | `/yunle_chassis/control/vcu_chassis_debug` | `chassis_interfaces/msg/VcuChassisDebug` | `ControlCommandBridge::ControlCommandBridge()` 内 lambda | 整合后的底盘调试控制命令，逻辑名 `VCU_Chassis_Debug` | CAN ID 1808 `VCU_Debug_Enable` 和 CAN ID 1813 `VCU_Drive_Debug`，通过 `sendControlFrame()` 发送 |
+
+辅助发布节点：
+
+| 节点 | 发布话题 | 消息类型 | 触发方式 | 用途 |
+|---|---|---|---|---|
+| `keyboard_scu_control_node` | `/yunle_chassis/control/scu_control_command` | `chassis_interfaces/msg/ScuControlCommand` | 非阻塞终端按键轮询和周期 timer | 用键盘手动控制 D/R/N、目标速度、转向、制动、灯光、模式和有效位 |
 
 `/yunle_chassis/control/scu_control_command` 运行时封装说明：
 
