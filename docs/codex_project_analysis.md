@@ -88,6 +88,7 @@ Declared in `ChassisDriverNode::loadParameters()` in `chassis_driver/src/chassis
 | `publish_raw_can` | `true` | Enables raw RX/TX CAN frame topics. |
 | `publish_unknown_frames` | `true` | Enables unknown-frame debug publishing. |
 | `enable_debug_topics` | `true` | Enables debug publishers. |
+| `log_control_can_frames` | `false` | Logs each successfully transmitted control CAN frame as hexadecimal text. This is independent from `/can_tx/raw`. |
 | `default_qos_depth` | `10` | QoS queue depth for publishers/subscribers. |
 | `enabled_publish_topics` | `["all"]` | Fine-grained publisher enable list. |
 | `enabled_subscribe_topics` | `["all"]` | Fine-grained subscriber enable list. |

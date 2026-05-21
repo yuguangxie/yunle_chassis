@@ -88,6 +88,7 @@ Launch：
 | `publish_raw_can` | `true` | 启用原始 RX/TX CAN 帧 topic。 |
 | `publish_unknown_frames` | `true` | 启用未知帧 debug 发布。 |
 | `enable_debug_topics` | `true` | 启用 debug publisher。 |
+| `log_control_can_frames` | `false` | 在节点日志中输出每一帧成功下发到底盘的控制 CAN 帧十六进制内容；该参数独立于 `/can_tx/raw`。 |
 | `default_qos_depth` | `10` | publisher/subscriber 的 QoS 队列深度。 |
 | `enabled_publish_topics` | `["all"]` | publisher 细粒度启用列表。 |
 | `enabled_subscribe_topics` | `["all"]` | subscriber 细粒度启用列表。 |

@@ -107,6 +107,7 @@ private:
   bool publish_raw_can_{true};
   bool publish_unknown_frames_{true};
   bool enable_debug_topics_{true};
+  bool log_control_can_frames_{false};
   int default_qos_depth_{10};
   std::unordered_map<std::string, std::string> control_channel_map_;
   std::unordered_map<std::string, std::string> feedback_channel_map_;

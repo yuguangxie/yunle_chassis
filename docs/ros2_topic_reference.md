@@ -25,6 +25,8 @@ topic 名称由 `topic_prefix` 与相对 topic 拼接生成。本文档默认使
 
 publisher 是否创建由 `enabled_publish_topics` 控制；subscriber 是否创建由 `enabled_subscribe_topics` 控制。默认均为 `["all"]`。
 
+控制 CAN 帧日志由参数 `log_control_can_frames` 控制，默认 `false`。当该参数为 `true` 时，每一帧成功发送到底盘的控制 CAN frame 会以十六进制输出到节点日志。该日志开关独立于 `/yunle_chassis/can_tx/raw` topic。
+
 可用 publisher key：
 
 | key | 默认 topic |

@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <iomanip>
 #include <sstream>
 
 namespace chassis_driver
@@ -40,6 +41,26 @@ chassis_interfaces::msg::CanFrame toRosFrame(const CanFrame & frame, const rclcp
   msg.data = frame.data;
   msg.channel = frame.channel;
   return msg;
+}
+
+/** Format a CAN frame as a compact hexadecimal string for operator logs. */
+std::string formatCanFrameHex(const CanFrame & frame, uint8_t channel, const std::string & message_name)
+{
+  std::ostringstream ss;
+  ss << message_name << " can" << static_cast<int>(channel)
+     << " id=0x" << std::uppercase << std::hex << frame.can_id
+     << " dlc=" << std::dec << static_cast<int>(frame.dlc)
+     << " data=[";
+  const auto dlc = std::min<uint8_t>(frame.dlc, static_cast<uint8_t>(8U));
+  for (uint8_t i = 0; i < dlc; ++i) {
+    if (i > 0) {
+      ss << ' ';
+    }
+    ss << std::uppercase << std::hex << std::setw(2) << std::setfill('0')
+       << static_cast<int>(frame.data[i]);
+  }
+  ss << "]";
+  return ss.str();
 }
 }  // namespace
 
@@ -103,6 +124,7 @@ void ChassisDriverNode::loadParameters()
   declare_parameter<bool>("publish_raw_can", true);
   declare_parameter<bool>("publish_unknown_frames", true);
   declare_parameter<bool>("enable_debug_topics", true);
+  declare_parameter<bool>("log_control_can_frames", false);
   declare_parameter<int>("default_qos_depth", 10);
   declare_parameter<std::vector<std::string>>("enabled_publish_topics", std::vector<std::string>{"all"});
   declare_parameter<std::vector<std::string>>("enabled_subscribe_topics", std::vector<std::string>{"all"});
@@ -134,6 +156,7 @@ void ChassisDriverNode::loadParameters()
   get_parameter("publish_raw_can", publish_raw_can_);
   get_parameter("publish_unknown_frames", publish_unknown_frames_);
   get_parameter("enable_debug_topics", enable_debug_topics_);
+  get_parameter("log_control_can_frames", log_control_can_frames_);
   get_parameter("default_qos_depth", default_qos_depth_);
 
   std::vector<std::string> enabled_publish_topics;
@@ -259,6 +282,10 @@ void ChassisDriverNode::sendControlFrame(const CanFrame & frame, const std::stri
   }
   CanFrame tx = frame;
   tx.channel = channel;
+  if (log_control_can_frames_) {
+    const auto formatted = formatCanFrameHex(tx, channel, message_name);
+    RCLCPP_INFO(get_logger(), "TX control CAN: %s", formatted.c_str());
+  }
   publishRawTx(tx);
 }
 

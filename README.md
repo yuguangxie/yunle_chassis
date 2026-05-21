@@ -53,6 +53,7 @@ All driver/network parameters are merged into one file:
 - `publish_raw_can`：是否发布原始收发 CAN 帧。
 - `publish_unknown_frames`：是否发布未知帧信息。
 - `enable_debug_topics`：是否启用 debug 类话题。
+- `log_control_can_frames`：是否在节点日志中输出成功下发到底盘的控制 CAN 帧十六进制内容。
 - `default_qos_depth`：发布订阅队列深度。
 - `enabled_publish_topics`：可选择启用发布话题（`all` 为全部）。
 - `enabled_subscribe_topics`：可选择启用订阅话题（`all` 为全部）。

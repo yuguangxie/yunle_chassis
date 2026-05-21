@@ -10,6 +10,8 @@ chassis_driver_node:
     publish_raw_can: true
     publish_unknown_frames: true
     enable_debug_topics: true
+    # Log each successfully transmitted control CAN frame as hexadecimal text.
+    log_control_can_frames: false
 
     # Default QoS queue depth used for publishers/subscribers.
     default_qos_depth: 10
