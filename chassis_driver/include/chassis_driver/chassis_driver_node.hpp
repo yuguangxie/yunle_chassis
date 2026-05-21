@@ -122,6 +122,10 @@ private:
   int udp_buffer_size_{2048};
   int socket_timeout_ms_{200};
 
+  double scu_control_max_steering_angle_deg_{27.0};
+  double scu_control_max_target_speed_kmh_{15.0};
+  int scu_control_default_drive_mode_request_{1};
+
   UdpChannel can1_;
   UdpChannel can2_;
 

@@ -77,3 +77,17 @@ chassis_driver_node:
     udp_buffer_size: 2048
     # Socket receive timeout in milliseconds.
     socket_timeout_ms: 200
+
+    # ==================== SCU control command wrapper ====================
+    # Maximum physical wheel steering angle used to convert
+    # /control/scu_control_command steering angles in degrees to 0x121 raw.
+    # The 2026 protocol gives examples: JD 24 deg, WD 27 deg, TD 25 deg.
+    scu_control_max_steering_angle_deg: 27.0
+
+    # Maximum accepted positive speed magnitude for SCU_Target_Speed.
+    # Commands above this value are treated as invalid and are not sent.
+    scu_control_max_target_speed_kmh: 15.0
+
+    # Default drive mode when ScuControlCommand.scu_drive_mode_request is 0.
+    # 1 = automatic-driving mode request, 3 = remote-controller mode request.
+    scu_control_default_drive_mode_request: 1

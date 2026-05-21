@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <sstream>
 
 namespace chassis_driver
@@ -118,6 +119,9 @@ void ChassisDriverNode::loadParameters()
   declare_parameter<int>("remote_port", 1234);
   declare_parameter<int>("udp_buffer_size", 2048);
   declare_parameter<int>("socket_timeout_ms", 200);
+  declare_parameter<double>("scu_control_max_steering_angle_deg", 27.0);
+  declare_parameter<double>("scu_control_max_target_speed_kmh", 15.0);
+  declare_parameter<int>("scu_control_default_drive_mode_request", 1);
 
   get_parameter("topic_prefix", topic_prefix_);
   if (topic_prefix_.empty()) {
@@ -157,6 +161,28 @@ void ChassisDriverNode::loadParameters()
   get_parameter("remote_port", remote_port_);
   get_parameter("udp_buffer_size", udp_buffer_size_);
   get_parameter("socket_timeout_ms", socket_timeout_ms_);
+  get_parameter("scu_control_max_steering_angle_deg", scu_control_max_steering_angle_deg_);
+  get_parameter("scu_control_max_target_speed_kmh", scu_control_max_target_speed_kmh_);
+  get_parameter("scu_control_default_drive_mode_request", scu_control_default_drive_mode_request_);
+
+  if (!std::isfinite(scu_control_max_steering_angle_deg_) || scu_control_max_steering_angle_deg_ <= 0.0) {
+    RCLCPP_WARN(
+      get_logger(), "Invalid scu_control_max_steering_angle_deg %.3f, fallback to 27.0",
+      scu_control_max_steering_angle_deg_);
+    scu_control_max_steering_angle_deg_ = 27.0;
+  }
+  if (!std::isfinite(scu_control_max_target_speed_kmh_) || scu_control_max_target_speed_kmh_ <= 0.0) {
+    RCLCPP_WARN(
+      get_logger(), "Invalid scu_control_max_target_speed_kmh %.3f, fallback to 15.0",
+      scu_control_max_target_speed_kmh_);
+    scu_control_max_target_speed_kmh_ = 15.0;
+  }
+  if (scu_control_default_drive_mode_request_ != 1 && scu_control_default_drive_mode_request_ != 3) {
+    RCLCPP_WARN(
+      get_logger(), "Invalid scu_control_default_drive_mode_request %d, fallback to auto mode 1",
+      scu_control_default_drive_mode_request_);
+    scu_control_default_drive_mode_request_ = 1;
+  }
 
   for (const auto & required : {"SCU_Control_Command", "SCU_Chassis_Command", "SCU_Torque_Command",
       "VCU_Debug_Enable", "VCU_Drive_Debug"}) {

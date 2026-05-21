@@ -101,6 +101,9 @@ Declared in `ChassisDriverNode::loadParameters()` in `chassis_driver/src/chassis
 | `remote_port` | `1234` | Remote UDP destination port. |
 | `udp_buffer_size` | `2048` | Receive buffer size. |
 | `socket_timeout_ms` | `200` | UDP receive timeout. |
+| `scu_control_max_steering_angle_deg` | `27.0` | 0x121 wrapper parameter: physical maximum steering angle used to convert `/control/scu_control_command` front/rear steering degrees to 8-bit two's-complement raw. |
+| `scu_control_max_target_speed_kmh` | `15.0` | 0x121 wrapper parameter: maximum accepted positive target speed; commands above this value are rejected and not sent. |
+| `scu_control_default_drive_mode_request` | `1` | 0x121 wrapper parameter: default drive mode sent when `ScuControlCommand.scu_drive_mode_request` is 0. Current default is auto-driving request. |
 
 ## 6. ROS2 Interfaces
 
@@ -131,6 +134,14 @@ Publish frequency is not timer-based in this code. It is exactly event-driven by
 | `/yunle_chassis/control/scu_chassis_command` | `chassis_interfaces/msg/ScuChassisCommand` | Lambda in `ControlCommandBridge::ControlCommandBridge()` at `control_command_bridge.cpp:41` | Steering angle speed and four brake-force commands | CAN ID 294 `SCU_Chassis_Command` via `sendControlFrame()` |
 | `/yunle_chassis/control/scu_torque_command` | `chassis_interfaces/msg/ScuTorqueCommand` | Lambda in `ControlCommandBridge::ControlCommandBridge()` at `control_command_bridge.cpp:57` | Four wheel torque commands | CAN ID 291 `SCU_Torque_Command` via `sendControlFrame()` |
 | `/yunle_chassis/control/vcu_chassis_debug` | `chassis_interfaces/msg/VcuChassisDebug` | Lambda in `ControlCommandBridge::ControlCommandBridge()` | Integrated chassis debug command, logical name `VCU_Chassis_Debug` | CAN IDs 1808 `VCU_Debug_Enable` and 1813 `VCU_Drive_Debug` via `sendControlFrame()` |
+
+Runtime wrapper note for `/yunle_chassis/control/scu_control_command`:
+
+- `ScuControlCommand.scu_shift_level_request` is accepted only as `1=D`, `2=N`, or `3=R`; invalid values are rejected before CAN send.
+- `ScuControlCommand.scu_drive_mode_request=0` is replaced with parameter `scu_control_default_drive_mode_request`, default `1`.
+- `scu_steering_angle_front` and `scu_steering_angle_rear` are ROS-side physical degrees. They are clamped by `scu_control_max_steering_angle_deg` and converted to 8-bit two's-complement raw using `raw_signed = angle_deg / max_angle_deg * 120`.
+- `scu_target_speed` is treated as a positive speed magnitude. The driver sends `abs(value)` and rejects the whole 0x121 command if it exceeds `scu_control_max_target_speed_kmh`.
+- Detailed differences against `docs/云乐线控底盘通信协议使用说明-2026.docx` are recorded in `docs/scu_control_command_wrapper_2026.md`.
 
 ### Services and Actions
 
