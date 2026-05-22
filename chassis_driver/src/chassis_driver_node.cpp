@@ -15,6 +15,8 @@ namespace chassis_driver
 
 namespace
 {
+constexpr double kSteeringAngleCodeAtMaxAngle = 120.0;
+
 /** Parse k:v parameter entries into hash map. */
 /** 将 k:v 形式的参数条目解析为哈希表。 */
 std::unordered_map<std::string, std::string> parseMap(const std::vector<std::string> & entries)
@@ -64,6 +66,16 @@ std::string formatCanFrameHex(const CanFrame & frame, uint8_t channel, const std
   }
   ss << "]";
   return ss.str();
+}
+
+/** Convert protocol steering-angle code to physical wheel angle in degrees. */
+/** 将协议转角编码值换算为实际车轮转角，单位为度。 */
+double steeringAngleCodeToDeg(double code, double max_steering_angle_deg)
+{
+  if (!std::isfinite(code)) {
+    return 0.0;
+  }
+  return code / kSteeringAngleCodeAtMaxAngle * max_steering_angle_deg;
 }
 }  // namespace
 
@@ -341,7 +353,11 @@ void ChassisDriverNode::publishDecoded(const CanFrame & frame)
       msg.ccu_ignition_status = static_cast<uint8_t>(get("CCU_Ignition_Status"));
       msg.ccu_drive_mode_shift_button = get("CCU_Drive_Mode_Shift_Button") > 0.5;
       msg.steering_wheel_direction = get("Steering_Wheel_Direction") > 0.5;
-      msg.ccu_steering_wheel_angle = static_cast<float>(get("CCU_Steering_Wheel_Angle"));
+      const double ccu_steering_code = get("CCU_Steering_Wheel_Angle");
+      const double ccu_steering_angle = steeringAngleCodeToDeg(
+        ccu_steering_code, scu_control_max_steering_angle_deg_);
+      msg.ccu_steering_wheel_angle = static_cast<float>(
+        msg.steering_wheel_direction ? ccu_steering_angle : -ccu_steering_angle);
       msg.ccu_vehicle_speed = static_cast<float>(get("CCU_Vehicle_Speed"));
       msg.ccu_drive_mode = static_cast<uint8_t>(get("CCU_Drive_Mode"));
       msg.remote_brake_request_status = get("Remote_Brake_Request_Status") > 0.5;
@@ -360,8 +376,10 @@ void ChassisDriverNode::publishDecoded(const CanFrame & frame)
     case 225U: {
       chassis_interfaces::msg::SasAngleFeedback msg;
       msg.stamp = stamp;
-      msg.sas_front_angle = static_cast<float>(get("SAS_Front_Angle"));
-      msg.sas_rear_angle = static_cast<float>(get("SAS_Rear_Angle"));
+      msg.sas_front_angle = static_cast<float>(steeringAngleCodeToDeg(
+        get("SAS_Front_Angle"), scu_control_max_steering_angle_deg_));
+      msg.sas_rear_angle = static_cast<float>(steeringAngleCodeToDeg(
+        get("SAS_Rear_Angle"), scu_control_max_steering_angle_deg_));
       if (sas_angle_pub_) { sas_angle_pub_->publish(msg); }
       break;
     }

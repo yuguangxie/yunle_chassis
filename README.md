@@ -102,7 +102,7 @@ chassis_driver/config/chassis_driver.yaml
 | `remote_port` | `1234` | 网关 UDP 目标端口。 |
 | `udp_buffer_size` | `2048` | UDP 接收缓冲区大小，单位字节。 |
 | `socket_timeout_ms` | `200` | UDP 接收超时时间，单位毫秒。 |
-| `scu_control_max_steering_angle_deg` | `27.0` | `/control/scu_control_command` 中前/后轮转角的最大允许物理角度。 |
+| `scu_control_max_steering_angle_deg` | `27.0` | 底盘最大物理转角；用于控制指令转角编码，也用于 SAS/CCU 转角反馈编码值换算。 |
 | `scu_control_max_target_speed_kmh` | `15.0` | `/control/scu_control_command` 中目标速度最大允许值，单位 km/h。 |
 
 ### 话题开关 key
@@ -147,8 +147,8 @@ chassis_driver/config/chassis_driver.yaml
 | `/yunle_chassis/feedback/bms_status` | `chassis_interfaces/msg/BmsStatus` | `0x100` | 电池电压、电流、SOC。 |
 | `/yunle_chassis/feedback/vcu_warning_level` | `chassis_interfaces/msg/VcuWarningLevel` | `0x077` | VCU 汇总故障等级。 |
 | `/yunle_chassis/feedback/wheel_speed` | `chassis_interfaces/msg/WheelSpeedFeedback` | `0x168` | 四轮转速反馈。 |
-| `/yunle_chassis/feedback/ccu_status` | `chassis_interfaces/msg/CcuStatus` | `0x051` | 档位、驻车、点火、车速、灯光、制动和模式状态。 |
-| `/yunle_chassis/feedback/sas_angle` | `chassis_interfaces/msg/SasAngleFeedback` | `0x0E1` | 前/后转角传感器反馈。 |
+| `/yunle_chassis/feedback/ccu_status` | `chassis_interfaces/msg/CcuStatus` | `0x051` | 档位、驻车、点火、车速、灯光、制动、模式状态和已换算为实际角度的方向盘转角。 |
+| `/yunle_chassis/feedback/sas_angle` | `chassis_interfaces/msg/SasAngleFeedback` | `0x0E1` | 已按最大转角换算为实际角度的前/后转角传感器反馈。 |
 | `/yunle_chassis/feedback/target_speed_feedback` | `chassis_interfaces/msg/ScuTargetSpeedFeedback` | `0x7F1` | 目标速度相关反馈。 |
 | `/yunle_chassis/can_rx/raw` | `chassis_interfaces/msg/CanFrame` | 全部接收帧 | 原始接收 CAN 帧，受 `publish_raw_can` 和话题开关控制。 |
 | `/yunle_chassis/can_tx/raw` | `chassis_interfaces/msg/CanFrame` | 全部发送帧 | 原始发送 CAN 帧，受 `publish_raw_can` 和话题开关控制。 |

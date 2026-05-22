@@ -231,7 +231,7 @@ Unknown frame: id=<can_id> ext=<is_extended> ch=<channel>
 | `ccu_ignition_status` | `CCU_Ignition_Status` | `3|2` | `uint8` | VCU 点火信号状态；协议文档中说明 `0` 异常，`1` 正常 |
 | `ccu_drive_mode_shift_button` | `CCU_Drive_Mode_Shift_Button` | `5|1` | `bool` | 自动驾驶切换按钮状态 |
 | `steering_wheel_direction` | `Steering_Wheel_Direction` | `7|1` | `bool` | 实际转向方向；协议文档：`0` 左，`1` 右 |
-| `ccu_steering_wheel_angle` | `CCU_Steering_Wheel_Angle` | `8|12` | `float32` | DBC/code factor `0.1`，协议文档说明最大编码值 120 |
+| `ccu_steering_wheel_angle` | `CCU_Steering_Wheel_Angle` | `8|12` | `float32` | 当前代码按 `编码值 / 120 × scu_control_max_steering_angle_deg` 换算为实际角度，并用 `Steering_Wheel_Direction` 决定正负号 |
 | `ccu_vehicle_speed` | `CCU_Vehicle_Speed` | `20|9` | `float32` | 当前车速，单位 km/h，factor `0.1` |
 | `ccu_drive_mode` | `CCU_Drive_Mode` | `29|3` | `uint8` | 当前驾驶模式；协议文档：`1` 自动驾驶，`3` 遥控器，`0/2` 预留 |
 | `remote_brake_request_status` | `Remote_Brake_Request_Status` | `32|1` | `bool` | 遥控刹车 |
@@ -260,8 +260,8 @@ Unknown frame: id=<can_id> ext=<is_extended> ch=<channel>
 | ROS 字段 | CAN 信号 | bit | 单位/语义 | 精度 |
 |---|---|---:|---|---|
 | `stamp` | 无 | - | driver 发布时刻 | - |
-| `sas_front_angle` | `SAS_Front_Angle` | `0|16` | 协议文档称为前转向角编码值 | factor `0.1` |
-| `sas_rear_angle` | `SAS_Rear_Angle` | `24|16` | 协议文档称为后转向角编码值 | factor `0.1` |
+| `sas_front_angle` | `SAS_Front_Angle` | `0|16` | 前轮实际转角，单位 deg | 由编码值按最大转角换算 |
+| `sas_rear_angle` | `SAS_Rear_Angle` | `24|16` | 后轮实际转角，单位 deg | 由编码值按最大转角换算 |
 
 协议文档说明：如果需要实际车轮转向角，应按底盘最大转角换算：
 
@@ -269,7 +269,7 @@ Unknown frame: id=<can_id> ext=<is_extended> ch=<channel>
 车轮角度 = 转向角度编码值 / 120 × 底盘最大转角
 ```
 
-文档中给出的底盘最大转角：JD `24 deg`，WD `27 deg`，TD `25 deg`。当前代码不执行该换算，只发布 DBC 解码后的物理值。
+文档中给出的底盘最大转角：JD `24 deg`，WD `27 deg`，TD `25 deg`。当前代码使用配置项 `scu_control_max_steering_angle_deg` 执行该换算。
 
 ### 5.6 `/yunle_chassis/feedback/target_speed_feedback`
 

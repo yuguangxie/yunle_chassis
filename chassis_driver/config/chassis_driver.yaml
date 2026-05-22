@@ -108,8 +108,11 @@ chassis_driver_node:
     # ==================== SCU 控制报文封装参数 ====================
     # Maximum physical wheel steering angle used to convert
     # /control/scu_control_command steering angles in degrees to 0x121 raw.
+    # The same value is also used to convert SAS/CCU steering feedback codes
+    # to physical steering angles.
     # The 2026 protocol gives examples: JD 24 deg, WD 27 deg, TD 25 deg.
     # 用于将 /control/scu_control_command 中角度制前/后轮转角转换为 0x121 原始值的最大物理车轮转角。
+    # 同一配置值也用于将 SAS/CCU 转角反馈编码值换算为实际转角。
     # 2026 协议文档给出的示例为：JD 24 度、WD 27 度、TD 25 度。
     scu_control_max_steering_angle_deg: 27.0
 
