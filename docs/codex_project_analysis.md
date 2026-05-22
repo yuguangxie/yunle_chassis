@@ -110,7 +110,8 @@ Declared in `ChassisDriverNode::loadParameters()` in `chassis_driver/src/chassis
 | `can2_local_port` | `8235` | Local UDP port for CAN2. |
 | `can1_remote_ip` | `192.168.1.98` | Remote CAN1 gateway IP. |
 | `can2_remote_ip` | `192.168.1.99` | Remote CAN2 gateway IP. |
-| `remote_port` | `1234` | Remote UDP destination port. |
+| `can1_remote_port` | `1234` | Remote UDP destination port for CAN1 gateway. |
+| `can2_remote_port` | `1234` | Remote UDP destination port for CAN2 gateway. |
 | `udp_buffer_size` | `2048` | Receive buffer size. |
 | `socket_timeout_ms` | `200` | UDP receive timeout. |
 | `scu_control_max_steering_angle_deg` | `27.0` | Chassis maximum physical steering angle. Used to convert `/control/scu_control_command` front/rear steering degrees to 8-bit two's-complement raw and to convert SAS/CCU steering feedback codes to physical angles. |
@@ -179,7 +180,7 @@ Initialization:
 
 1. `ChassisDriverNode::initializeChannels()` opens CAN1 and CAN2.
 2. Each channel binds to the configured `local_ip` and local port.
-3. Each channel stores a fixed remote IP and `remote_port`.
+3. Each channel stores a fixed remote IP and its own remote UDP port.
 4. If either open fails, node logs fatal and throws.
 
 Reconnect:

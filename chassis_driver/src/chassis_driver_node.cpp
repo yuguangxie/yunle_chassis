@@ -153,7 +153,8 @@ void ChassisDriverNode::loadParameters()
   declare_parameter<int>("can2_local_port", 8235);
   declare_parameter<std::string>("can1_remote_ip", "192.168.1.98");
   declare_parameter<std::string>("can2_remote_ip", "192.168.1.99");
-  declare_parameter<int>("remote_port", 1234);
+  declare_parameter<int>("can1_remote_port", 1234);
+  declare_parameter<int>("can2_remote_port", 1234);
   declare_parameter<int>("udp_buffer_size", 2048);
   declare_parameter<int>("socket_timeout_ms", 200);
   declare_parameter<double>("scu_control_max_steering_angle_deg", 27.0);
@@ -195,7 +196,8 @@ void ChassisDriverNode::loadParameters()
   get_parameter("can2_local_port", can2_local_port_);
   get_parameter("can1_remote_ip", can1_remote_ip_);
   get_parameter("can2_remote_ip", can2_remote_ip_);
-  get_parameter("remote_port", remote_port_);
+  get_parameter("can1_remote_port", can1_remote_port_);
+  get_parameter("can2_remote_port", can2_remote_port_);
   get_parameter("udp_buffer_size", udp_buffer_size_);
   get_parameter("socket_timeout_ms", socket_timeout_ms_);
   get_parameter("scu_control_max_steering_angle_deg", scu_control_max_steering_angle_deg_);
@@ -227,12 +229,12 @@ void ChassisDriverNode::loadParameters()
 void ChassisDriverNode::initializeChannels()
 {
   if (!can1_.open(local_ip_, static_cast<uint16_t>(can1_local_port_), can1_remote_ip_,
-      static_cast<uint16_t>(remote_port_), socket_timeout_ms_, udp_buffer_size_)) {
+      static_cast<uint16_t>(can1_remote_port_), socket_timeout_ms_, udp_buffer_size_)) {
     RCLCPP_FATAL(get_logger(), "Failed to initialize CAN1 UDP channel");
     throw std::runtime_error("can1 open failed");
   }
   if (!can2_.open(local_ip_, static_cast<uint16_t>(can2_local_port_), can2_remote_ip_,
-      static_cast<uint16_t>(remote_port_), socket_timeout_ms_, udp_buffer_size_)) {
+      static_cast<uint16_t>(can2_remote_port_), socket_timeout_ms_, udp_buffer_size_)) {
     RCLCPP_FATAL(get_logger(), "Failed to initialize CAN2 UDP channel");
     throw std::runtime_error("can2 open failed");
   }

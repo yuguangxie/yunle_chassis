@@ -93,9 +93,10 @@ chassis_driver_node:
     # 每个通道对应的远端 CAN 网关 IP。
     can1_remote_ip: 192.168.1.98
     can2_remote_ip: 192.168.1.99
-    # Remote UDP destination port.
-    # 远端 UDP 目标端口。
-    remote_port: 1234
+    # Remote UDP destination port for each CAN gateway.
+    # 每个 CAN 网关对应的远端 UDP 目标端口。
+    can1_remote_port: 1234
+    can2_remote_port: 1234
 
     # UDP receive buffer size (bytes).
     # UDP 接收缓冲区大小，单位字节。

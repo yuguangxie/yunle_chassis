@@ -99,7 +99,8 @@ chassis_driver/config/chassis_driver.yaml
 | `can2_local_port` | `8235` | CAN2 本地 UDP 端口。 |
 | `can1_remote_ip` | `192.168.1.98` | CAN1 网关 IP。 |
 | `can2_remote_ip` | `192.168.1.99` | CAN2 网关 IP。 |
-| `remote_port` | `1234` | 网关 UDP 目标端口。 |
+| `can1_remote_port` | `1234` | CAN1 网关 UDP 目标端口。 |
+| `can2_remote_port` | `1234` | CAN2 网关 UDP 目标端口。 |
 | `udp_buffer_size` | `2048` | UDP 接收缓冲区大小，单位字节。 |
 | `socket_timeout_ms` | `200` | UDP 接收超时时间，单位毫秒。 |
 | `scu_control_max_steering_angle_deg` | `27.0` | 底盘最大物理转角；用于控制指令转角编码，也用于 SAS/CCU 转角反馈编码值换算。 |
