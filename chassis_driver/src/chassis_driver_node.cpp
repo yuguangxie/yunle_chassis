@@ -16,6 +16,8 @@ namespace chassis_driver
 
 namespace
 {
+constexpr double kSteeringAngleCodeAtMaxAngle = 120.0;
+
 /** Parse k:v parameter entries into hash map. */
 /** 将 k:v 形式的参数条目解析为哈希表。 */
 std::unordered_map<std::string, std::string> parseMap(const std::vector<std::string> & entries)
@@ -67,6 +69,16 @@ std::string formatCanFrameHex(const CanFrame & frame, uint8_t channel, const std
   }
   ss << "]";
   return ss.str();
+}
+
+/** Convert protocol steering-angle code to physical wheel angle in degrees. */
+/** 将协议转角编码值换算为实际车轮转角，单位为度。 */
+double steeringAngleCodeToDeg(double code, double max_steering_angle_deg)
+{
+  if (!std::isfinite(code)) {
+    return 0.0;
+  }
+  return code / kSteeringAngleCodeAtMaxAngle * max_steering_angle_deg;
 }
 }  // namespace
 
@@ -171,7 +183,8 @@ void ChassisDriverNode::loadParameters()
   pnh_.param<int>("can2_local_port", can2_local_port_, 8235);
   pnh_.param<std::string>("can1_remote_ip", can1_remote_ip_, "192.168.1.98");
   pnh_.param<std::string>("can2_remote_ip", can2_remote_ip_, "192.168.1.99");
-  pnh_.param<int>("remote_port", remote_port_, 1234);
+  pnh_.param<int>("can1_remote_port", can1_remote_port_, 1234);
+  pnh_.param<int>("can2_remote_port", can2_remote_port_, 1234);
   pnh_.param<int>("udp_buffer_size", udp_buffer_size_, 2048);
   pnh_.param<int>("socket_timeout_ms", socket_timeout_ms_, 200);
   pnh_.param<double>("scu_control_max_steering_angle_deg", scu_control_max_steering_angle_deg_, 27.0);
@@ -201,12 +214,12 @@ void ChassisDriverNode::loadParameters()
 void ChassisDriverNode::initializeChannels()
 {
   if (!can1_.open(local_ip_, static_cast<uint16_t>(can1_local_port_), can1_remote_ip_,
-      static_cast<uint16_t>(remote_port_), socket_timeout_ms_, udp_buffer_size_)) {
+      static_cast<uint16_t>(can1_remote_port_), socket_timeout_ms_, udp_buffer_size_)) {
     ROS_FATAL("Failed to initialize CAN1 UDP channel");
     throw std::runtime_error("can1 open failed");
   }
   if (!can2_.open(local_ip_, static_cast<uint16_t>(can2_local_port_), can2_remote_ip_,
-      static_cast<uint16_t>(remote_port_), socket_timeout_ms_, udp_buffer_size_)) {
+      static_cast<uint16_t>(can2_remote_port_), socket_timeout_ms_, udp_buffer_size_)) {
     ROS_FATAL("Failed to initialize CAN2 UDP channel");
     throw std::runtime_error("can2 open failed");
   }
@@ -327,7 +340,11 @@ void ChassisDriverNode::publishDecoded(const CanFrame & frame)
       msg.ccu_ignition_status = static_cast<uint8_t>(get("CCU_Ignition_Status"));
       msg.ccu_drive_mode_shift_button = get("CCU_Drive_Mode_Shift_Button") > 0.5;
       msg.steering_wheel_direction = get("Steering_Wheel_Direction") > 0.5;
-      msg.ccu_steering_wheel_angle = static_cast<float>(get("CCU_Steering_Wheel_Angle"));
+      const double ccu_steering_code = get("CCU_Steering_Wheel_Angle");
+      const double ccu_steering_angle = steeringAngleCodeToDeg(
+        ccu_steering_code, scu_control_max_steering_angle_deg_);
+      msg.ccu_steering_wheel_angle = static_cast<float>(
+        msg.steering_wheel_direction ? ccu_steering_angle : -ccu_steering_angle);
       msg.ccu_vehicle_speed = static_cast<float>(get("CCU_Vehicle_Speed"));
       msg.ccu_drive_mode = static_cast<uint8_t>(get("CCU_Drive_Mode"));
       msg.remote_brake_request_status = get("Remote_Brake_Request_Status") > 0.5;
@@ -346,8 +363,10 @@ void ChassisDriverNode::publishDecoded(const CanFrame & frame)
     case 225U: {
       chassis_interfaces::SasAngleFeedback msg;
       msg.stamp = stamp;
-      msg.sas_front_angle = static_cast<float>(get("SAS_Front_Angle"));
-      msg.sas_rear_angle = static_cast<float>(get("SAS_Rear_Angle"));
+      msg.sas_front_angle = static_cast<float>(steeringAngleCodeToDeg(
+        get("SAS_Front_Angle"), scu_control_max_steering_angle_deg_));
+      msg.sas_rear_angle = static_cast<float>(steeringAngleCodeToDeg(
+        get("SAS_Rear_Angle"), scu_control_max_steering_angle_deg_));
       if (sas_angle_pub_) { sas_angle_pub_.publish(msg); }
       break;
     }

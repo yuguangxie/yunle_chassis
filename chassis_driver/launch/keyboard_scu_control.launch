@@ -1,0 +1,15 @@
+<launch>
+  <!-- Start the ROS1 keyboard SCU control node in the foreground terminal when possible. -->
+  <!-- 启动 ROS1 键盘 SCU 控制节点；交互控制建议优先使用 rosrun 在前台终端运行。 -->
+  <node pkg="chassis_driver" type="keyboard_scu_control_node" name="keyboard_scu_control_node" output="screen">
+    <param name="topic_name" value="/yunle_chassis/control/scu_control_command" />
+    <param name="publish_rate_hz" value="20.0" />
+    <param name="speed_step_kmh" value="0.5" />
+    <param name="default_speed_kmh" value="1.0" />
+    <param name="max_speed_kmh" value="15.0" />
+    <param name="steering_step_deg" value="2.0" />
+    <param name="max_steering_angle_deg" value="27.0" />
+    <param name="rear_steering_ratio" value="0.0" />
+    <param name="auto_publish_zero_on_exit" value="true" />
+  </node>
+</launch>

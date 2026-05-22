@@ -91,9 +91,10 @@ can2_local_port: 8235
 # 每个 CAN 通道对应的远端 CAN 网关 IP。
 can1_remote_ip: 192.168.1.98
 can2_remote_ip: 192.168.1.99
-# Remote UDP destination port.
-# 远端 UDP 目标端口。
-remote_port: 1234
+# Remote UDP destination port for each CAN gateway.
+# 每个 CAN 网关对应的远端 UDP 目标端口。
+can1_remote_port: 1234
+can2_remote_port: 1234
 
 # UDP receive buffer size (bytes).
 # UDP 接收缓冲区大小，单位 byte。
@@ -106,9 +107,12 @@ socket_timeout_ms: 200
 # ==================== SCU 控制命令封装 ====================
 # Maximum physical wheel steering angle used to convert
 # /control/scu_control_command steering angles in degrees to 0x121 raw.
+# The same value is also used to convert SAS/CCU steering feedback codes
+# to physical steering angles.
 # The 2026 protocol gives examples: JD 24 deg, WD 27 deg, TD 25 deg.
 # 车辆物理最大车轮转角，用于把 /control/scu_control_command 中
 # 以度为单位的转角转换为 0x121 报文 raw 值。
+# 同一配置值也用于将 SAS/CCU 转角反馈编码值换算为实际转角。
 # 2026 协议示例：JD 24 deg，WD 27 deg，TD 25 deg。
 scu_control_max_steering_angle_deg: 27.0
 

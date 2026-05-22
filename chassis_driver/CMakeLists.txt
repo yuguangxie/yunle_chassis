@@ -34,7 +34,16 @@ add_executable(chassis_driver_node
   src/udp_channel.cpp
 )
 
+add_executable(keyboard_scu_control_node
+  src/keyboard_scu_control_node.cpp
+)
+
 add_dependencies(chassis_driver_node
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+)
+
+add_dependencies(keyboard_scu_control_node
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
 )
@@ -43,7 +52,11 @@ target_link_libraries(chassis_driver_node
   ${catkin_LIBRARIES}
 )
 
-install(TARGETS chassis_driver_node
+target_link_libraries(keyboard_scu_control_node
+  ${catkin_LIBRARIES}
+)
+
+install(TARGETS chassis_driver_node keyboard_scu_control_node
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

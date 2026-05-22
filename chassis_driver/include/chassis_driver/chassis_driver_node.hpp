@@ -146,7 +146,8 @@ private:
   int can2_local_port_{8235};
   std::string can1_remote_ip_;
   std::string can2_remote_ip_;
-  int remote_port_{1234};
+  int can1_remote_port_{1234};
+  int can2_remote_port_{1234};
   int udp_buffer_size_{2048};
   int socket_timeout_ms_{200};
 

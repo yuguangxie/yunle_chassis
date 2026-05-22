@@ -3,7 +3,7 @@
   <name>chassis_interfaces</name>
   <version>0.1.0</version>
   <description>Custom ROS1 message definitions for Yunle chassis driver.</description>
-  <maintainer email="dev@example.com">Yunle Dev</maintainer>
+  <maintainer email="dev@example.com">skywilling</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>catkin</buildtool_depend>

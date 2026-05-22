@@ -1,5 +1,7 @@
 # 云乐线控底盘 ROS1 驱动使用说明
 
+项目归属：skywilling。
+
 本项目是一个 ROS1 C++ 底盘驱动工作空间，用于通过以太网转 CAN 网关与云乐线控底盘通信。驱动节点接收底盘 CAN 反馈报文并发布为 ROS topic，也订阅 ROS 控制 topic，将控制指令编码为 CAN 报文后通过 UDP 下发到底盘。
 
 当前代码中的 CAN 协议定义与 `Yunle_CAN_release.dbc` 对齐。运行时不解析 DBC 文件，DBC 报文和信号定义已经固化在 `chassis_driver/src/dbc_protocol.cpp` 中。
@@ -14,9 +16,9 @@ yunle_chassis/
     config/                    节点、话题、UDP 网关和控制封装参数
     launch/                    ROS1 XML launch 文件
     include/chassis_driver/    驱动节点、UDP、CAN 编解码、DBC 协议声明
-    src/                       驱动节点、UDP、CAN 编解码、DBC 协议实现
+    src/                       驱动节点、UDP、CAN 编解码、DBC 协议和键盘控制实现
   Yunle_CAN_release.dbc        当前协议参考 DBC
-  docs/                        项目分析、话题说明和协议适配说明
+  docs/                        协议说明、ROS1 话题说明和用户文档
 ```
 
 | 包名 | 作用 |
@@ -147,7 +149,8 @@ control_message_channel_map:
 | `can2_local_port` | `8235` | CAN2 的本地 UDP 端口。 |
 | `can1_remote_ip` | `192.168.1.98` | CAN1 网关远端 IP。 |
 | `can2_remote_ip` | `192.168.1.99` | CAN2 网关远端 IP。 |
-| `remote_port` | `1234` | 网关远端 UDP 端口。 |
+| `can1_remote_port` | `1234` | CAN1 网关远端 UDP 目标端口。 |
+| `can2_remote_port` | `1234` | CAN2 网关远端 UDP 目标端口。 |
 | `udp_buffer_size` | `2048` | UDP 接收缓冲区大小，单位 byte。 |
 | `socket_timeout_ms` | `200` | UDP socket 接收超时时间，单位 ms。 |
 
@@ -155,7 +158,7 @@ control_message_channel_map:
 
 | 参数 | 默认值 | 说明 |
 |---|---:|---|
-| `scu_control_max_steering_angle_deg` | `27.0` | 车辆实际最大转角，用于把 `/control/scu_control_command` 中的前后轮转角从度数换算为 0x121 报文 raw 值。 |
+| `scu_control_max_steering_angle_deg` | `27.0` | 车辆实际最大转角，用于把 `/control/scu_control_command` 中的前后轮转角从度数换算为 0x121 报文 raw 值，也用于将 SAS/CCU 转角反馈编码值换算为实际转角。 |
 | `scu_control_max_target_speed_kmh` | `15.0` | `/control/scu_control_command` 目标速度最大值，单位 km/h。非有限数、负值或超出 `[0, max]` 的速度会记录 warning 并按 0 下发。 |
 
 ## 6. 以太网转 CAN 通信格式
@@ -166,7 +169,7 @@ control_message_channel_map:
 
 | 字节 | 含义 |
 |---:|---|
-| 0 | 信息字节。`0x80` 表示扩展帧，`0x40` 表示远程帧，低 4 bit 为 DLC。发送时会额外置位 `0x20`。 |
+| 0 | 信息字节。`0x80` 表示扩展帧，`0x40` 表示远程帧，低 4 bit 为 DLC。发送时 bit5 保留位保持 `0`。 |
 | 1-4 | CAN ID，网关传输格式为大端序。标准帧 ID 会被裁剪到 `0x7FF`。 |
 | 5-12 | CAN data，共 8 byte。 |
 
@@ -188,12 +191,12 @@ control_message_channel_map:
 
 | 话题 | 消息类型 | 来源 CAN ID | 说明 |
 |---|---|---:|---|
-| `/yunle_chassis/feedback/bms_status` | `chassis_interfaces/BmsStatus` | `0x100` / 256 | 电池电压、电流、SOC。 |
-| `/yunle_chassis/feedback/vcu_warning_level` | `chassis_interfaces/VcuWarningLevel` | `0x077` / 119 | BMS、MCU、转向、制动等告警等级。 |
-| `/yunle_chassis/feedback/wheel_speed` | `chassis_interfaces/WheelSpeedFeedback` | `0x168` / 360 | 四轮轮速，单位 rpm。 |
-| `/yunle_chassis/feedback/ccu_status` | `chassis_interfaces/CcuStatus` | `0x051` / 81 | 档位、驻车、点火、车速、驾驶模式、制动请求、灯光状态等。 |
-| `/yunle_chassis/feedback/sas_angle` | `chassis_interfaces/SasAngleFeedback` | `0x0E1` / 225 | 前后转角反馈，单位 deg。 |
-| `/yunle_chassis/feedback/target_speed_feedback` | `chassis_interfaces/ScuTargetSpeedFeedback` | `0x7F1` / 2033 | 硬件目标速度、SCU 目标速度反馈、车辆目标速度和目标转速。 |
+| `/yunle_chassis/feedback/bms_status` | `chassis_interfaces/BmsStatus` | `0x100` | 电池电压、电流、SOC。 |
+| `/yunle_chassis/feedback/vcu_warning_level` | `chassis_interfaces/VcuWarningLevel` | `0x077` | BMS、MCU、转向、制动等告警等级。 |
+| `/yunle_chassis/feedback/wheel_speed` | `chassis_interfaces/WheelSpeedFeedback` | `0x168` | 四轮轮速，单位 rpm。 |
+| `/yunle_chassis/feedback/ccu_status` | `chassis_interfaces/CcuStatus` | `0x051` | 档位、驻车、点火、车速、驾驶模式、制动请求、灯光状态和已换算为实际角度的方向盘转角。 |
+| `/yunle_chassis/feedback/sas_angle` | `chassis_interfaces/SasAngleFeedback` | `0x0E1` | 已按最大转角换算为实际角度的前/后转角传感器反馈。 |
+| `/yunle_chassis/feedback/target_speed_feedback` | `chassis_interfaces/ScuTargetSpeedFeedback` | `0x7F1` | 硬件目标速度、SCU 目标速度反馈、车辆目标速度和目标转速。 |
 
 查看反馈示例：
 
@@ -216,7 +219,7 @@ chassis_interfaces/ScuControlCommand
 对应 CAN 报文：
 
 ```text
-SCU_Control_Command, CAN ID 0x121 / 289
+SCU_Control_Command, CAN ID 0x121
 ```
 
 | 字段 | 类型 | 说明 |
@@ -259,11 +262,32 @@ rostopic pub -1 /yunle_chassis/control/scu_control_command chassis_interfaces/Sc
 }"
 ```
 
+停车制动示例：
+
+```bash
+rostopic pub -1 /yunle_chassis/control/scu_control_command chassis_interfaces/ScuControlCommand "{
+  scu_shift_level_request: 1,
+  scu_steering_angle_front: 0.0,
+  scu_steering_angle_rear: 0.0,
+  scu_target_speed: 0.0,
+  scu_brake_enable: true,
+  gw_left_turn_light_request: 0,
+  gw_right_turn_light_request: 0,
+  gw_position_light_request: 0,
+  gw_low_beam_request: 0,
+  scu_torque_or_speed_mode: 1,
+  steering_angle_speed_valid: true,
+  brake_force_command_valid: true
+}"
+```
+
 ### 8.2 `/yunle_chassis/control/scu_chassis_command`
 
 消息类型：`chassis_interfaces/ScuChassisCommand`
 
-对应 CAN 报文：`SCU_Chassis_Command, CAN ID 0x126 / 294`
+对应 CAN 报文：`SCU_Chassis_Command, CAN ID 0x126`
+
+> **警示：该控制会直接影响底盘制动力和转向执行响应，可能导致车辆突然制动、转向或姿态变化。仅允许在专业人士指导下，在车辆架空、低风险测试场地或已确认急停链路有效的环境中操作。**
 
 ```bash
 rostopic pub -1 /yunle_chassis/control/scu_chassis_command chassis_interfaces/ScuChassisCommand "{
@@ -279,7 +303,9 @@ rostopic pub -1 /yunle_chassis/control/scu_chassis_command chassis_interfaces/Sc
 
 消息类型：`chassis_interfaces/ScuTorqueCommand`
 
-对应 CAN 报文：`SCU_Torque_Command, CAN ID 0x123 / 291`
+对应 CAN 报文：`SCU_Torque_Command, CAN ID 0x123`
+
+> **警示：四轮扭矩控制会直接作用于驱动轮输出，错误参数可能导致车辆突然加速、打滑或失控。仅允许在专业人士指导下，并确认车辆安全固定、急停和制动链路有效后操作。**
 
 ```bash
 rostopic pub -1 /yunle_chassis/control/scu_torque_command chassis_interfaces/ScuTorqueCommand "{
@@ -297,11 +323,13 @@ rostopic pub -1 /yunle_chassis/control/scu_torque_command chassis_interfaces/Scu
 对应 CAN 报文：
 
 ```text
-VCU_Debug_Enable, CAN ID 0x710 / 1808
-VCU_Drive_Debug,  CAN ID 0x715 / 1813
+VCU_Debug_Enable, CAN ID 0x710
+VCU_Drive_Debug,  CAN ID 0x715
 ```
 
 该 ROS 话题会被驱动拆分并下发为两个 CAN 报文。
+
+> **警示：VCU 调试控制会修改或使能速度环 PID 调试相关参数，可能改变车辆控制响应和稳定性。该操作仅供专业调试人员使用，必须在专业人士指导下，在安全测试环境中执行。**
 
 ```bash
 rostopic pub -1 /yunle_chassis/control/vcu_chassis_debug chassis_interfaces/VcuChassisDebug "{
@@ -312,7 +340,45 @@ rostopic pub -1 /yunle_chassis/control/vcu_chassis_debug chassis_interfaces/VcuC
 }"
 ```
 
-## 9. 原始 CAN 帧消息
+## 9. 键盘控制节点
+
+键盘节点发布 `/yunle_chassis/control/scu_control_command`，适合在可控环境下做低速人工联调。
+
+推荐直接在有键盘焦点的前台终端运行：
+
+```bash
+rosrun chassis_driver keyboard_scu_control_node
+```
+
+也可以使用 launch 启动，但它更适合检查节点参数和发布行为，不推荐作为实际键盘控制入口：
+
+```bash
+roslaunch chassis_driver keyboard_scu_control.launch
+```
+
+节点启动后的默认控制消息为 N 档、零速度、零转角、制动关闭、灯光关闭，并且 `scu_torque_or_speed_mode=0`、`steering_angle_speed_valid=false`、`brake_force_command_valid=false`。需要发送有效控制时，可通过按键 `m` 切换扭矩/速度模式，通过按键 `v` 切换有效位。
+
+按键说明：
+
+| 按键 | 功能 |
+|---|---|
+| `w` | 增加目标速度，不改变当前档位。 |
+| `s` | 降低目标速度，不改变当前档位。 |
+| `1` / `2` / `3` | 选择 D / N / R 档。 |
+| `q` / `e` | 降低 / 提高目标速度。 |
+| `a` / `d` | 左转 / 右转。 |
+| `c` | 转角回正。 |
+| `x` | N 档零速命令。 |
+| `Space` | N 档制动。 |
+| `b` | 切换制动使能。 |
+| `j` / `k` | 切换左 / 右转向灯请求。 |
+| `u` / `i` | 切换位置灯 / 近光灯请求。 |
+| `m` | 切换扭矩/速度模式。 |
+| `v` | 切换转向角速度和制动力有效位。 |
+| `h` | 打印中英文帮助。 |
+| `Ctrl-C` | 退出。 |
+
+## 10. 原始 CAN 帧消息
 
 `/yunle_chassis/can_rx/raw` 和 `/yunle_chassis/can_tx/raw` 使用：
 
@@ -330,7 +396,7 @@ chassis_interfaces/CanFrame
 | `data` | 8 字节 CAN 数据。 |
 | `channel` | 逻辑 CAN 通道，`1` 或 `2`。 |
 
-## 10. 控制 CAN 十六进制日志
+## 11. 控制 CAN 十六进制日志
 
 如果需要在节点日志中查看实际下发到底盘的控制 CAN 帧，可以在配置文件中设置：
 
@@ -344,7 +410,7 @@ log_control_can_frames: true
 TX control CAN: SCU_Control_Command can2 id=0x121 dlc=8 data=[...]
 ```
 
-## 11. 当前安全与实时性说明
+## 12. 当前安全与实时性说明
 
 当前驱动已经具备：
 
@@ -364,7 +430,7 @@ TX control CAN: SCU_Control_Command can2 id=0x121 dlc=8 data=[...]
 - 底盘反馈丢帧或超时检测。
 - TF 或 `nav_msgs/Odometry` 里程计发布。
 
-## 12. 常用排查命令
+## 13. 常用排查命令
 
 查看节点：
 
@@ -394,9 +460,7 @@ rosparam get /chassis_driver_node/topic_prefix
 ss -lunp | grep -E '8234|8235|1234'
 ```
 
-## 13. 更多文档
+## 14. 更多文档
 
-- `docs/codex_project_analysis.md`：项目结构、通信链路、CAN 映射和扩展指南。
-- `docs/codex_project_analysis_zh.md`：中文版项目分析。
 - `docs/ros1_topic_reference.md`：ROS1 话题详细说明。
-- `docs/scu_control_command_wrapper_2026.md`：`/yunle_chassis/control/scu_control_command` 与 2026 协议文档的封装说明和差异说明。
+- `docs/云乐线控底盘通信协议使用说明-2026.docx`：当前项目参考的线控底盘通信协议说明。
