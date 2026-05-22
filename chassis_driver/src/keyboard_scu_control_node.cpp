@@ -167,7 +167,6 @@ private:
     switch (key) {
       case 'w':
       case 'W':
-        command_.scu_shift_level_request = chassis_interfaces::msg::ScuControlCommand::SHIFT_LEVEL_D;
         command_.scu_brake_enable = false;
         if (command_.scu_target_speed <= 0.0F) {
           command_.scu_target_speed = static_cast<float>(default_speed_kmh_);
@@ -177,13 +176,16 @@ private:
         return true;
       case 's':
       case 'S':
+        adjustSpeed(-speed_step_kmh_);
+        return true;
+      case '1':
+        command_.scu_shift_level_request = chassis_interfaces::msg::ScuControlCommand::SHIFT_LEVEL_D;
+        return true;
+      case '2':
+        command_.scu_shift_level_request = chassis_interfaces::msg::ScuControlCommand::SHIFT_LEVEL_N;
+        return true;
+      case '3':
         command_.scu_shift_level_request = chassis_interfaces::msg::ScuControlCommand::SHIFT_LEVEL_R;
-        command_.scu_brake_enable = false;
-        if (command_.scu_target_speed <= 0.0F) {
-          command_.scu_target_speed = static_cast<float>(default_speed_kmh_);
-        } else {
-          adjustSpeed(speed_step_kmh_);
-        }
         return true;
       case 'e':
       case 'E':
@@ -272,9 +274,6 @@ private:
   {
     const double current = static_cast<double>(command_.scu_target_speed);
     command_.scu_target_speed = static_cast<float>(clamp(current + delta, 0.0, max_speed_kmh_));
-    if (command_.scu_target_speed <= 0.0F) {
-      command_.scu_shift_level_request = chassis_interfaces::msg::ScuControlCommand::SHIFT_LEVEL_N;
-    }
   }
 
   void adjustSteering(double delta)
@@ -313,7 +312,8 @@ private:
   {
     std::cout
       << "\nKeyboard SCU control keys:\n"
-      << "  w/s: drive forward/reverse, repeated press increases speed\n"
+      << "  w/s: increase/decrease target speed\n"
+      << "  1/2/3: select D/N/R shift level\n"
       << "  q/e: decrease/increase target speed\n"
       << "  a/d: steer left/right\n"
       << "  c: center steering\n"

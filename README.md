@@ -305,8 +305,9 @@ ros2 launch chassis_driver keyboard_scu_control.launch.py
 
 | 按键 | 功能 |
 |---|---|
-| `w` | D 档前进，重复按增加速度。 |
-| `s` | R 档后退，重复按增加速度。 |
+| `w` | 增加目标速度，不改变当前档位。 |
+| `s` | 降低目标速度，不改变当前档位。 |
+| `1` / `2` / `3` | 选择 D / N / R 档。 |
 | `q` / `e` | 降低 / 提高目标速度。 |
 | `a` / `d` | 左转 / 右转。 |
 | `c` | 转角回正。 |
@@ -327,7 +328,7 @@ ros2 launch chassis_driver keyboard_scu_control.launch.py
 | `topic_name` | `/yunle_chassis/control/scu_control_command` | 发布目标话题。 |
 | `publish_rate_hz` | `20.0` | 键盘控制命令发布频率。 |
 | `speed_step_kmh` | `0.5` | 每次按键速度变化量。 |
-| `default_speed_kmh` | `1.0` | 第一次进入 D/R 档时的默认速度。 |
+| `default_speed_kmh` | `1.0` | 目标速度为 0 时首次按 `w` 使用的默认速度。 |
 | `max_speed_kmh` | `15.0` | 键盘节点侧速度上限。 |
 | `steering_step_deg` | `2.0` | 每次按键转角变化量。 |
 | `max_steering_angle_deg` | `27.0` | 键盘节点侧转角上限。 |

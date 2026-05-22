@@ -62,6 +62,7 @@ Keyboard helper executable:
 - Launch: `chassis_driver/launch/keyboard_scu_control.launch.py`.
 - Recommended interactive command: `ros2 run chassis_driver keyboard_scu_control_node`, because launch frontends may not attach stdin in every terminal setup.
 - Default command state is N gear, zero speed, zero steering, brake disabled, lights disabled, `scu_torque_or_speed_mode=0`, `steering_angle_speed_valid=false`, and `brake_force_command_valid=false`.
+- Keyboard speed and shift are decoupled: `w/s` increase/decrease target speed, while `1/2/3` select D/N/R.
 - This helper is independent from the CAN-over-Ethernet driver node; it does not access UDP sockets directly.
 
 Node class:

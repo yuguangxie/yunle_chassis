@@ -62,6 +62,7 @@ yunle_chassis/
 - Launch：`chassis_driver/launch/keyboard_scu_control.launch.py`。
 - 推荐交互式运行命令：`ros2 run chassis_driver keyboard_scu_control_node`，因为某些 launch 前端不会把 stdin 连接到子进程。
 - 默认命令状态为 N 档、零速度、零转角、制动关闭、灯光关闭，且 `scu_torque_or_speed_mode=0`、`steering_angle_speed_valid=false`、`brake_force_command_valid=false`。
+- 键盘速度和档位已解耦：`w/s` 增加/降低目标速度，`1/2/3` 分别选择 D/N/R 档。
 - 该节点独立于以太网转 CAN 驱动节点，不直接访问 UDP socket。
 
 节点类：
