@@ -48,7 +48,7 @@ std::array<uint8_t, 13> CanEthernetCodec::encodeFrame(const CanFrame & frame)
 {
   std::array<uint8_t, 13> out{};
   const uint8_t dlc = frame.dlc > 8U ? 8U : frame.dlc;
-  out[0] = static_cast<uint8_t>((frame.is_extended ? 0x80U : 0x00U) | 0x20U | (dlc & 0x0FU));
+  out[0] = static_cast<uint8_t>((frame.is_extended ? 0x80U : 0x00U) | (dlc & 0x0FU));
   out[1] = static_cast<uint8_t>((frame.can_id >> 24U) & 0xFFU);
   out[2] = static_cast<uint8_t>((frame.can_id >> 16U) & 0xFFU);
   out[3] = static_cast<uint8_t>((frame.can_id >> 8U) & 0xFFU);
