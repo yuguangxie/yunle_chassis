@@ -1,5 +1,7 @@
 # 云乐线控底盘 ROS2 驱动
 
+项目归属：skywilling。
+
 本仓库提供一个 ROS2 C++ 底盘驱动，用于通过以太网转 CAN 网关和云乐线控底盘通信。驱动负责接收底盘反馈 CAN 报文并发布为 ROS2 话题，同时订阅 ROS2 控制话题、封装为 CAN 报文并通过 UDP 发送到底盘。
 
 当前代码中的 CAN 协议映射与仓库根目录的 `Yunle_CAN_release.dbc` 对齐。运行时不解析 DBC 文件，DBC 信号定义已经固化在 `chassis_driver/src/dbc_protocol.cpp` 中。
@@ -23,7 +25,7 @@ yunle_chassis/
     src/                       驱动节点、控制封装、反馈解析、键盘控制实现
     config/                    统一参数配置文件
     launch/                    驱动节点和键盘控制节点启动文件
-  docs/                        项目分析、协议说明和话题说明文档
+  docs/                        协议说明、ROS2 话题说明和用户文档
   Yunle_CAN_release.dbc        当前参考 DBC 文件
 ```
 
@@ -233,7 +235,7 @@ ros2 topic pub --once /yunle_chassis/control/scu_control_command chassis_interfa
 
 ```bash
 ros2 topic pub --once /yunle_chassis/control/scu_control_command chassis_interfaces/msg/ScuControlCommand "{
-  scu_shift_level_request: 2,
+  scu_shift_level_request: 1,
   scu_steering_angle_front: 0.0,
   scu_steering_angle_rear: 0.0,
   scu_target_speed: 0.0,
@@ -250,6 +252,8 @@ ros2 topic pub --once /yunle_chassis/control/scu_control_command chassis_interfa
 
 ### 底盘制动力/转向角速度控制
 
+> **警示：该控制会直接影响底盘制动力和转向执行响应，可能导致车辆突然制动、转向或姿态变化。仅允许在专业人士指导下，在车辆架空、低风险测试场地或已确认急停链路有效的环境中操作。**
+
 ```bash
 ros2 topic pub --once /yunle_chassis/control/scu_chassis_command chassis_interfaces/msg/ScuChassisCommand "{
   vcu_target_steering_angle_speed: 180.0,
@@ -262,6 +266,8 @@ ros2 topic pub --once /yunle_chassis/control/scu_chassis_command chassis_interfa
 
 ### 四轮扭矩控制
 
+> **警示：四轮扭矩控制会直接作用于驱动轮输出，错误参数可能导致车辆突然加速、打滑或失控。仅允许在专业人士指导下，并确认车辆安全固定、急停和制动链路有效后操作。**
+
 ```bash
 ros2 topic pub --once /yunle_chassis/control/scu_torque_command chassis_interfaces/msg/ScuTorqueCommand "{
   torque_command_front_left: 100.0,
@@ -272,6 +278,8 @@ ros2 topic pub --once /yunle_chassis/control/scu_torque_command chassis_interfac
 ```
 
 ### VCU 调试控制
+
+> **警示：VCU 调试控制会修改或使能速度环 PID 调试相关参数，可能改变车辆控制响应和稳定性。该操作仅供专业调试人员使用，必须在专业人士指导下，在安全测试环境中执行。**
 
 ```bash
 ros2 topic pub --once /yunle_chassis/control/vcu_chassis_debug chassis_interfaces/msg/VcuChassisDebug "{

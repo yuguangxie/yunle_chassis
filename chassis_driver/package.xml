@@ -3,7 +3,7 @@
   <name>chassis_driver</name>
   <version>0.1.0</version>
   <description>Single-node ROS2 Humble chassis CAN-over-Ethernet driver with hardcoded DBC protocol.</description>
-  <maintainer email="dev@example.com">Yunle Dev</maintainer>
+  <maintainer email="dev@example.com">skywilling</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
