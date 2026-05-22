@@ -135,9 +135,9 @@ private:
     command_.gw_right_turn_light_request = 0U;
     command_.gw_position_light_request = 0U;
     command_.gw_low_beam_request = 0U;
-    command_.scu_torque_or_speed_mode = 1U;
-    command_.steering_angle_speed_valid = true;
-    command_.brake_force_command_valid = true;
+    command_.scu_torque_or_speed_mode = 0U;
+    command_.steering_angle_speed_valid = false;
+    command_.brake_force_command_valid = false;
   }
 
   void tick()

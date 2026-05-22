@@ -285,17 +285,21 @@ ros2 topic pub --once /yunle_chassis/control/vcu_chassis_debug chassis_interface
 
 键盘节点发布 `/yunle_chassis/control/scu_control_command`，适合在可控环境下做低速人工联调。
 
-推荐直接在终端运行：
+推荐直接在有键盘焦点的前台终端运行：
 
 ```bash
 ros2 run chassis_driver keyboard_scu_control_node
 ```
 
-也可以使用 launch：
+交互式键盘控制优先使用 `ros2 run`。`ros2 launch` 启动子进程时可能不会把当前终端的 `stdin` 连接给键盘节点，此时节点会提示 `stdin is not a TTY or raw mode failed`，按键可能无法被读取。
+
+也可以使用 launch 启动，但它更适合检查节点参数和发布行为，不推荐作为实际键盘控制入口：
 
 ```bash
 ros2 launch chassis_driver keyboard_scu_control.launch.py
 ```
+
+节点启动后的默认控制消息为 N 档、零速度、零转角、制动关闭、灯光关闭，并且 `scu_torque_or_speed_mode=0`、`steering_angle_speed_valid=false`、`brake_force_command_valid=false`。需要发送有效控制时，可通过按键 `m` 切换扭矩/速度模式，通过按键 `v` 切换有效位。
 
 常用按键：
 
