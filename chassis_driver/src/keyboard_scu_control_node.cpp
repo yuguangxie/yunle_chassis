@@ -311,20 +311,20 @@ private:
   void printHelp() const
   {
     std::cout
-      << "\nKeyboard SCU control keys:\n"
-      << "  w/s: increase/decrease target speed\n"
-      << "  1/2/3: select D/N/R shift level\n"
-      << "  q/e: decrease/increase target speed\n"
-      << "  a/d: steer left/right\n"
-      << "  c: center steering\n"
-      << "  x: neutral zero command\n"
-      << "  SPACE: brake and neutral\n"
-      << "  b: toggle brake enable\n"
-      << "  j/k/u/i: toggle left/right/position/low-beam light request\n"
-      << "  m: toggle torque-or-speed mode\n"
-      << "  v: toggle valid flags\n"
-      << "  h: print this help\n"
-      << "  Ctrl-C: exit\n"
+      << "\nKeyboard SCU control keys / 键盘 SCU 控制按键:\n"
+      << "  w/s: increase/decrease target speed / 增加/降低目标速度\n"
+      << "  1/2/3: select D/N/R shift level / 选择 D/N/R 档位\n"
+      << "  q/e: decrease/increase target speed / 降低/提高目标速度\n"
+      << "  a/d: steer left/right / 左转/右转\n"
+      << "  c: center steering / 转角回正\n"
+      << "  x: neutral zero command / N 档零速命令\n"
+      << "  SPACE: brake and neutral / N 档制动\n"
+      << "  b: toggle brake enable / 切换制动使能\n"
+      << "  j/k/u/i: toggle left/right/position/low-beam light request / 切换左转/右转/位置灯/近光灯请求\n"
+      << "  m: toggle torque-or-speed mode / 切换扭矩或速度模式\n"
+      << "  v: toggle valid flags / 切换有效位\n"
+      << "  h: print this help / 打印本帮助\n"
+      << "  Ctrl-C: exit / 退出\n"
       << std::endl;
   }
 
